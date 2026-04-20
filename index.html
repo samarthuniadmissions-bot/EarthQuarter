@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earthquarter | 15 Minutes for Smarter Energy</title>
+  <meta name="description" content="Earthquarter is a student-led initiative helping families and schools reduce electricity waste through a weekly 15-minute switch-off action.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" id="top">
+    <a class="brand" href="#top" aria-label="Earthquarter home">
+      <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="#action">Action</a>
+      <a href="#facts">Facts</a>
+      <a href="#impact">Impact</a>
+      <a href="#faq">FAQ</a>
+      <a class="nav-highlight" href="join.html">Join</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="action" aria-labelledby="hero-title">
+      <div class="hero-bg-circles" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow">A student-led initiative</p>
+        <h1 id="hero-title">Power Down.<br><em>Wake Up.</em></h1>
+        <p class="hero-sub">15 minutes. Every week. Real change.</p>
+        <p class="hero-copy">Earthquarter is a movement to make energy awareness part of everyday life - starting with students, spreading to families and communities.</p>
+      </div>
+    </section>
+
+    <section class="countdown-action" aria-labelledby="timer-title">
+      <div class="timer-intro">
+        <p class="eyebrow">The weekly action</p>
+        <h2 id="timer-title">Start your 15-minute switch-off.</h2>
+      </div>
+      <div class="timer-panel" aria-label="Earthquarter 15-minute timer">
+        <div class="timer-display" id="timerDisplay" aria-live="polite">15:00</div>
+        <div class="timer-actions">
+          <button class="primary-button" id="startTimer" type="button">Start 15 Minutes</button>
+          <button class="ghost-button" id="resetTimer" type="button">Reset</button>
+        </div>
+        <p class="timer-note" id="timerNote">Before starting, switch off non-essential lights, fans, chargers, screens, and idle devices.</p>
+        <div class="mini-circuit" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <strong>15 min awareness pulse</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro-section" aria-labelledby="why-title">
+      <div class="section-copy">
+        <p class="eyebrow">The idea</p>
+        <h2 id="why-title">Most energy waste is quiet.</h2>
+        <p>Earthquarter began with a simple observation: electricity is often wasted through small unnoticed habits, not through bad intentions. A light left on. A fan running in an empty room. A charger plugged in long after it is needed.</p>
+      </div>
+    </section>
+
+    <section class="image-band" aria-labelledby="practice-title">
+      <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80" alt="Students working together in a classroom">
+      <div class="image-band-copy">
+        <p class="eyebrow">Everyday practice</p>
+        <h2 id="practice-title">Small actions become shared habits.</h2>
+        <p>Families, schools, and students can make energy awareness visible by choosing one regular moment every week to pause, check, and switch off non-essential electricity.</p>
+      </div>
+    </section>
+
+    <section class="impact-section" id="impact" aria-labelledby="impact-title">
+      <div class="section-heading">
+        <p class="eyebrow">Why it matters</p>
+        <h2 id="impact-title">Saving electricity also saves hidden resources.</h2>
+      </div>
+      <div class="impact-grid">
+        <article class="impact-card">
+          <img src="https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=900&q=80" alt="Wind turbines on green land">
+          <div>
+            <h3>Lower energy demand</h3>
+            <p>Switching off unused appliances reduces the load created by everyday waste.</p>
+          </div>
+        </article>
+        <article class="impact-card">
+          <img src="https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=900&q=80" alt="Clear water flowing through a natural landscape">
+          <div>
+            <h3>Water conservation</h3>
+            <p>Using less electricity can reduce pressure on water used in parts of energy production and cooling.</p>
+          </div>
+        </article>
+        <article class="impact-card">
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80" alt="Sunlight shining through a forest">
+          <div>
+            <h3>Reduced emissions</h3>
+            <p>Lower consumption means fewer avoidable emissions when electricity comes from carbon-heavy sources.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="checklist-section" aria-labelledby="checklist-title">
+      <div class="section-copy">
+        <p class="eyebrow">Before the quarter</p>
+        <h2 id="checklist-title">A quick room-by-room check.</h2>
+        <p>Use this list before starting the 15-minute action. Keep essential electricity on for safety, health, study needs, and accessibility.</p>
+      </div>
+      <div class="checklist" aria-label="Switch-off checklist">
+        <label><input type="checkbox"> Empty-room lights are off</label>
+        <label><input type="checkbox"> Unused fans are off</label>
+        <label><input type="checkbox"> Chargers are unplugged</label>
+        <label><input type="checkbox"> Idle screens are asleep</label>
+        <label><input type="checkbox"> Non-essential plugs are switched off</label>
+      </div>
+    </section>
+
+    <section class="school-section" id="school" aria-labelledby="school-title">
+      <div class="school-copy">
+        <p class="eyebrow">For schools</p>
+        <h2 id="school-title">Let students lead the change.</h2>
+        <p>Earthquarter gives student groups a clear weekly action they can organize, measure, and talk about. The habit is simple enough for every classroom, but meaningful enough to start bigger conversations about electricity, water, and climate responsibility.</p>
+      </div>
+      <div class="steps" aria-label="School action steps">
+        <article>
+          <span>01</span>
+          <h3>Choose a weekly time</h3>
+          <p>Pick a regular 15-minute period that works for classrooms and homes.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Announce the check</h3>
+          <p>Remind everyone to switch off only what is safe and non-essential.</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Share the habit</h3>
+          <p>Invite students to bring the same awareness into their families.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="calculator-section" id="facts" aria-labelledby="calculator-title">
+      <div class="section-heading">
+        <p class="eyebrow">15-minute facts</p>
+        <h2 id="calculator-title">See what switching off lights can save.</h2>
+        <p>Electricity saved depends on the wattage of the lights and how many are switched off. Earthquarter uses the standard calculation: watts multiplied by time, divided by 1000.</p>
+      </div>
+      <div class="lights-layout">
+        <div class="light-calculator">
+          <form class="calculator" id="lightsForm">
+            <label>
+              Place
+              <select id="placeInput">
+                <option value="home">Home</option>
+                <option value="office">Office</option>
+                <option value="school">School</option>
+                <option value="shop">Shop</option>
+                <option value="classroom">Classroom</option>
+                <option value="building">Building</option>
+              </select>
+            </label>
+            <label>
+              Lights switched off
+              <input id="lightsInput" type="number" min="1" max="500" value="10">
+            </label>
+            <label>
+              Watts per light
+              <input id="lightWattsInput" type="number" min="1" max="500" value="9">
+            </label>
+            <label>
+              Earthquarters completed per week
+              <input id="sessionsInput" type="number" min="1" max="21" value="1">
+            </label>
+            <button class="primary-button" type="submit">Update facts</button>
+          </form>
+          <p class="formula-note">Formula: lights x watts x 0.25 hours / 1000 = kWh saved per 15-minute switch-off.</p>
+          <p class="result" id="savingsResult" aria-live="polite">10 LED lights using 9 watts each save about 0.023 kWh every Earthquarter.</p>
+          <div class="source-note">
+            Electricity estimate inspired by the <a href="https://www.ostrom.de/en/stromrechner" rel="noopener">Ostrom electricity calculator</a>. Energy-efficiency context is linked to the <a href="https://www.worldenergy.org/news-views/entry/world-energy-council-launches-energy-efficiency-report-at-cop22" rel="noopener">World Energy Council</a>.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="fact-grid">
+        <article class="fact-card">
+          <span id="sessionKwh">0.023 kWh</span>
+          <h3>saved in one 15-minute action</h3>
+          <p>Small for one room, powerful when a whole class or school joins.</p>
+        </article>
+        <article class="fact-card">
+          <span id="yearlyKwh">1.17 kWh</span>
+          <h3>saved in a year at this weekly pace</h3>
+          <p>Weekly repetition turns a short pause into a visible habit.</p>
+        </article>
+        <article class="fact-card">
+          <span id="communityKwh">117 kWh</span>
+          <h3>if 100 people do the same</h3>
+          <p>Earthquarter works because the action is shared, not because one person does everything.</p>
+        </article>
+      </div>
+
+      <div class="waste-year-panel" aria-live="polite">
+        <div>
+          <p class="eyebrow">One year avoided waste</p>
+          <h3>Every extra Earthquarter cuts more avoidable waste.</h3>
+          <p id="wasteYearText">In one year, this weekly habit prevents about 1.17 kWh from being wasted by one participant, or 117 kWh across 100 participants.</p>
+        </div>
+        <div class="waste-meter" aria-hidden="true">
+          <span id="wasteMeterFill"></span>
+          <strong id="wasteMeterLabel">1.17 kWh</strong>
+        </div>
+      </div>
+
+      <div class="quick-facts">
+        <p><strong>1 LED light at 9 W:</strong> 15 minutes off saves 0.002 kWh.</p>
+        <p><strong>1 old 60 W bulb:</strong> 15 minutes off saves 0.015 kWh.</p>
+        <p><strong>Efficiency matters:</strong> the <a href="https://www.worldenergy.org/news-views/entry/world-energy-council-launches-energy-efficiency-report-at-cop22" rel="noopener">World Energy Council</a> highlights energy efficiency as a direct path toward energy sustainability.</p>
+      </div>
+    </section>
+
+    <section class="faq-section" id="faq" aria-labelledby="faq-title">
+      <div class="section-heading">
+        <p class="eyebrow">FAQ</p>
+        <h2 id="faq-title">Questions people ask before they join.</h2>
+      </div>
+      <div class="faq-list">
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            What should we switch off during Earthquarter?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Switch off non-essential electricity: empty-room lights, unused fans, idle screens, chargers, and appliances that are safe to pause.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Should essential electricity be turned off?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>No. Keep electricity on for safety, health needs, accessibility, study needs, refrigeration, security, and anything an adult or teacher says must stay on.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Why is the action 15 minutes long?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Fifteen minutes is short enough for a school or family to try every week, but long enough to notice what usually stays on without anyone thinking about it.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Does switching off one light really matter?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>One modern LED saves a small amount in 15 minutes. The bigger purpose is habit-building: many lights, many students, and many weeks make the saving easier to see.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Can schools run Earthquarter without special equipment?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. A weekly announcement, a classroom checklist, and a student volunteer team are enough to start. The website timer can be projected or opened on a phone.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="join-section" id="join" aria-labelledby="join-title">
+      <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1500&q=80" alt="Students gathered around a table working on a shared project">
+      <div class="join-copy">
+        <p class="eyebrow">Join Earthquarter</p>
+        <h2 id="join-title">Start with one quarter of an hour.</h2>
+        <p>Choose your weekly Earthquarter time, invite your class or family, and keep the habit alive until energy awareness feels natural.</p>
+        <a class="primary-link" href="join.html">Join the initiative</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Earthquarter Initiative</p>
+    <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
