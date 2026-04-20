@@ -390,6 +390,7 @@ h2 em {
 }
 
 .intro-section,
+.founder-section,
 .impact-section,
 .checklist-section,
 .school-section,
@@ -475,6 +476,86 @@ h2 em {
 .image-band-copy p {
   color: rgba(255, 255, 255, 0.88);
   font-size: 1.08rem;
+}
+
+.founder-section {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
+  gap: 40px;
+  align-items: center;
+  background:
+    radial-gradient(circle at top right, rgba(240, 192, 96, 0.18), transparent 30%),
+    linear-gradient(135deg, #f7fbf5, #eef6f0);
+}
+
+.founder-photo-panel {
+  position: relative;
+  padding: 14px;
+  background: linear-gradient(135deg, rgba(45, 90, 61, 0.12), rgba(240, 192, 96, 0.28));
+  border-radius: 18px;
+  box-shadow: 0 20px 44px rgba(26, 58, 42, 0.14);
+}
+
+.founder-photo-panel::after {
+  content: "";
+  position: absolute;
+  inset: auto 18px -18px 18px;
+  height: 28px;
+  background: rgba(26, 58, 42, 0.08);
+  filter: blur(18px);
+  border-radius: 999px;
+}
+
+.founder-photo-panel img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  max-height: 620px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.founder-story {
+  max-width: 700px;
+}
+
+.founder-question {
+  margin: 12px 0 18px;
+  color: var(--leaf-dark);
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: 1.35rem;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.founder-story p {
+  color: var(--muted);
+  font-size: 1.05rem;
+}
+
+.founder-note {
+  display: grid;
+  gap: 8px;
+  margin-top: 26px;
+  padding: 20px 22px;
+  background: rgba(255, 255, 255, 0.84);
+  border-left: 5px solid var(--amber);
+  border-radius: 8px;
+  box-shadow: 0 12px 28px rgba(26, 58, 42, 0.08);
+}
+
+.founder-note strong {
+  color: var(--leaf-dark);
+  font-family: "Space Mono", monospace;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+}
+
+.founder-note p {
+  margin: 0;
+  color: var(--leaf-dark);
+  font-weight: 700;
 }
 
 .impact-section {
@@ -1211,6 +1292,7 @@ h2 em {
   }
 
   .intro-section,
+  .founder-section,
   .countdown-action,
   .join-form-section,
   .checklist-section,
@@ -1271,6 +1353,7 @@ h2 em {
   .join-hero,
   .join-form-section,
   .intro-section,
+  .founder-section,
   .impact-section,
   .checklist-section,
   .school-section,
@@ -1323,6 +1406,7 @@ h2 em {
   .intro-section,
   .countdown-action,
   .join-form-section,
+  .founder-section,
   .impact-section,
   .checklist-section,
   .school-section,
@@ -1367,6 +1451,10 @@ h2 em {
   .impact-card img,
   .join-section img {
     height: 250px;
+  }
+
+  .founder-photo-panel img {
+    max-height: 460px;
   }
 
   .site-footer {
