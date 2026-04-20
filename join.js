@@ -90,12 +90,12 @@ function setError(id, message) {
 }
 
 function setEmailStatus(message, tone = "") {
-  emailStatus.textContent = message;
-  emailStatus.className = "email-status";
-
-  if (tone) {
-    emailStatus.classList.add(`is-${tone}`);
+  if (!emailStatus) {
+    return;
   }
+
+  emailStatus.hidden = true;
+  emailStatus.textContent = "";
 }
 
 function clearErrors() {
@@ -470,7 +470,7 @@ async function sendAdminSubmission(submission) {
 
   document.body.appendChild(adminForm);
   adminForm.submit();
-  adminForm.remove();
+  window.setTimeout(() => adminForm.remove(), 1000);
 }
 
 function buildEmailParams(submission) {
