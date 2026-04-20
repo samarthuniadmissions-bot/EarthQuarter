@@ -423,20 +423,51 @@ function saveSubmission(submission) {
   localStorage.setItem("earthquarterJoinSubmissions", JSON.stringify(saved));
 }
 
-async function emailSubmission(submission) {
+function buildEmailParams(submission, toEmail, replyTo, summaryMessage) {
+  return {
+    name: submission.name,
+    message: summaryMessage || submission.message,
+    to_email: toEmail,
+    reply_to: replyTo,
+    subject: toEmail === emailRecipient
+      ? `New Earthquarter submission from ${submission.name}`
+      : `Thank you for joining Earthquarter, ${submission.name} 🌱`,
+    display_time: submission.displayTime,
+    phone: submission.phone,
+    address: submission.address,
+    email: submission.email
+  };
+}
+
+async function emailSubmission(submission, toEmail, replyTo, summaryMessage) {
   if (!initEmailJs()) {
     throw new Error("EmailJS is not configured yet. Add your public key, service ID, and template ID in join.js.");
   }
 
-  return window.emailjs.send(emailJsConfig.serviceId, emailJsConfig.templateId, {
-    name: submission.name,
-    message: submission.message,
-    to_email: submission.email,
-    reply_to: emailRecipient,
-    display_time: submission.displayTime,
-    phone: submission.phone,
-    address: submission.address
-  });
+  return window.emailjs.send(
+    emailJsConfig.serviceId,
+    emailJsConfig.templateId,
+    buildEmailParams(submission, toEmail, replyTo, summaryMessage)
+  );
+}
+
+function sendSubmissionEmails(submission) {
+  const adminSummary = [
+    `New Earthquarter submission received from ${submission.name}.`,
+    "",
+    `User email: ${submission.email}`,
+    `Phone: ${submission.phone}`,
+    `Address: ${submission.address}`,
+    `Preferred Earthquarter time: ${submission.displayTime}`,
+    "",
+    "Message:",
+    submission.message
+  ].join("\n");
+
+  return Promise.allSettled([
+    emailSubmission(submission, emailRecipient, submission.email, adminSummary),
+    emailSubmission(submission, submission.email, emailRecipient, submission.message)
+  ]);
 }
 
 function updateCalendarLink(submission) {
@@ -540,16 +571,25 @@ form.addEventListener("submit", async (event) => {
 
   const submission = buildSubmission();
   submitButton.disabled = true;
-  setEmailStatus("Saving your plan and sending your Earthquarter email...", "pending");
+  setEmailStatus("Saving your plan and sending both Earthquarter emails...", "pending");
 
   saveSubmission(submission);
 
   try {
-    await emailSubmission(submission);
-    setEmailStatus("Your Earthquarter email was sent successfully.", "success");
+    const results = await sendSubmissionEmails(submission);
+    const adminResult = results[0].status;
+    const userResult = results[1].status;
+
+    if (adminResult === "fulfilled" && userResult === "fulfilled") {
+      setEmailStatus("Your plan was sent to Earthquarter and to your email successfully.", "success");
+    } else if (adminResult === "fulfilled" || userResult === "fulfilled") {
+      setEmailStatus("Your plan was saved. One email sent, but the other needs a quick check.", "pending");
+    } else {
+      throw new Error("Both email sends failed. Please check your EmailJS template settings.");
+    }
   } catch (error) {
     console.error(error);
-    setEmailStatus(error.message || "Your plan was saved, but the email could not be sent yet.", "error");
+    setEmailStatus(error.message || "Your plan was saved, but the emails could not be sent yet.", "error");
   }
 
   if (savePlan.checked) {
