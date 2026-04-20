@@ -18,8 +18,10 @@ const calendarLink = document.getElementById("calendarLink");
 const emailStatus = document.getElementById("emailStatus");
 const submitButton = form.querySelector('button[type="submit"]');
 const emailRecipient = "earthquarter24@gmail.com";
+const formSubmitRecipient = "earthquarter24@gmail.com";
 const draftStorageKey = "earthquarterSavedPlan";
 const rememberCookieName = "earthquarterRememberPlan";
+let isSubmitting = false;
 const emailJsConfig = {
   publicKey: "oWzdB-OXZ5v0zw0_F",
   serviceId: "gmail_earthquarter",
@@ -423,12 +425,59 @@ function saveSubmission(submission) {
   localStorage.setItem("earthquarterJoinSubmissions", JSON.stringify(saved));
 }
 
+function buildFormSubmitUrl(recipient) {
+  return `https://formsubmit.co/${encodeURIComponent(recipient)}`;
+}
+
+async function sendAdminSubmission(submission) {
+  let iframe = document.getElementById("earthquarterFormSubmitFrame");
+
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.id = "earthquarterFormSubmitFrame";
+    iframe.name = "earthquarterFormSubmitFrame";
+    iframe.hidden = true;
+    document.body.appendChild(iframe);
+  }
+
+  const adminForm = document.createElement("form");
+  adminForm.method = "POST";
+  adminForm.action = buildFormSubmitUrl(formSubmitRecipient);
+  adminForm.target = "earthquarterFormSubmitFrame";
+  adminForm.hidden = true;
+
+  const addField = (name, value) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = name;
+    input.value = value;
+    adminForm.appendChild(input);
+  };
+
+  addField("Name", submission.name);
+  addField("Phone", submission.phone);
+  addField("Email", submission.email);
+  addField("Country", submission.country);
+  addField("Address type", submission.addressType);
+  addField("Address", submission.address);
+  addField("Date of birth", submission.dateOfBirth);
+  addField("Earthquarter time", submission.displayTime);
+  addField("Message", submission.message);
+  addField("Submitted at", submission.submittedAt);
+  addField("_subject", `New Earthquarter submission from ${submission.name}`);
+  addField("_captcha", "false");
+  addField("_template", "table");
+
+  document.body.appendChild(adminForm);
+  adminForm.submit();
+  adminForm.remove();
+}
+
 function buildEmailParams(submission) {
   return {
     name: submission.name,
     message: submission.message,
     email: submission.email,
-    to_email: submission.email,
     reply_to: emailRecipient,
     subject: `Thank you for joining Earthquarter, ${submission.name}`,
     display_time: submission.displayTime,
@@ -545,22 +594,31 @@ calendarLink.addEventListener("click", (event) => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
+  if (isSubmitting) {
+    return;
+  }
+
   if (!validateForm()) {
     return;
   }
 
+  isSubmitting = true;
   const submission = buildSubmission();
   submitButton.disabled = true;
-  setEmailStatus("Saving your plan and sending your Earthquarter welcome email...", "pending");
+  setEmailStatus("Saving your plan and sending your Earthquarter emails...", "pending");
 
   saveSubmission(submission);
 
   try {
+    await sendAdminSubmission(submission);
     await emailSubmission(submission);
-    setEmailStatus("Your welcome email was sent successfully.", "success");
+    setEmailStatus("Your plan was submitted successfully.", "success");
   } catch (error) {
     console.error(error);
-    setEmailStatus(error.message || "Your plan was saved, but the welcome email could not be sent yet.", "error");
+    setEmailStatus(error.message || "Your plan was saved, but one of the emails could not be sent yet.", "error");
+  } finally {
+    isSubmitting = false;
+    submitButton.disabled = false;
   }
 
   if (savePlan.checked) {
@@ -571,7 +629,6 @@ form.addEventListener("submit", async (event) => {
   updateCalendarLink(submission);
   joinSuccess.hidden = false;
   joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
-  submitButton.disabled = false;
 });
 
 updatePhoneHint();
