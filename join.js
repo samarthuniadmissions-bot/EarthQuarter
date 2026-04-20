@@ -15,9 +15,16 @@ const savePlan = document.getElementById("savePlan");
 const joinSuccess = document.getElementById("joinSuccess");
 const successSummary = document.getElementById("successSummary");
 const calendarLink = document.getElementById("calendarLink");
+const emailStatus = document.getElementById("emailStatus");
+const submitButton = form.querySelector('button[type="submit"]');
 const emailRecipient = "earthquarter24@gmail.com";
 const draftStorageKey = "earthquarterSavedPlan";
 const rememberCookieName = "earthquarterRememberPlan";
+const emailJsConfig = {
+  publicKey: "oWzdB-OXZ5v0zw0_F",
+  serviceId: "gmail_earthquarter",
+  templateId: "template_b1qj1hj"
+};
 
 const citiesByRegion = {
   "Andaman and Nicobar Islands": ["Port Blair", "Diglipur", "Mayabunder", "Rangat", "Hut Bay", "Car Nicobar", "Other city/town"],
@@ -80,10 +87,39 @@ function setError(id, message) {
   }
 }
 
+function setEmailStatus(message, tone = "") {
+  emailStatus.textContent = message;
+  emailStatus.className = "email-status";
+
+  if (tone) {
+    emailStatus.classList.add(`is-${tone}`);
+  }
+}
+
 function clearErrors() {
   ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "switchMessage"].forEach((id) => {
     setError(id, "");
   });
+}
+
+function hasEmailJsConfig() {
+  return Object.values(emailJsConfig).every((value) => value && !value.startsWith("YOUR_EMAILJS_"));
+}
+
+function initEmailJs() {
+  if (!window.emailjs || !hasEmailJsConfig()) {
+    return false;
+  }
+
+  window.emailjs.init({
+    publicKey: emailJsConfig.publicKey,
+    limitRate: {
+      id: "earthquarter-join",
+      throttle: 1000
+    }
+  });
+
+  return true;
 }
 
 function onlyDigits(value) {
@@ -387,49 +423,20 @@ function saveSubmission(submission) {
   localStorage.setItem("earthquarterJoinSubmissions", JSON.stringify(saved));
 }
 
-function addHiddenField(formElement, name, value) {
-  const input = document.createElement("input");
-  input.type = "hidden";
-  input.name = name;
-  input.value = value;
-  formElement.appendChild(input);
-}
-
-function emailSubmission(submission) {
-  let iframe = document.getElementById("earthquarterMailFrame");
-
-  if (!iframe) {
-    iframe = document.createElement("iframe");
-    iframe.id = "earthquarterMailFrame";
-    iframe.name = "earthquarterMailFrame";
-    iframe.hidden = true;
-    document.body.appendChild(iframe);
+async function emailSubmission(submission) {
+  if (!initEmailJs()) {
+    throw new Error("EmailJS is not configured yet. Add your public key, service ID, and template ID in join.js.");
   }
 
-  const emailForm = document.createElement("form");
-  emailForm.method = "POST";
-  emailForm.action = `https://formsubmit.co/${emailRecipient}`;
-  emailForm.target = "earthquarterMailFrame";
-  emailForm.hidden = true;
-
-  addHiddenField(emailForm, "_subject", `New Earthquarter plan - ${submission.name}`);
-  addHiddenField(emailForm, "_template", "table");
-  addHiddenField(emailForm, "_captcha", "false");
-  addHiddenField(emailForm, "_honey", "");
-  addHiddenField(emailForm, "Name", submission.name);
-  addHiddenField(emailForm, "Phone", submission.phone);
-  addHiddenField(emailForm, "Email", submission.email);
-  addHiddenField(emailForm, "Country", submission.country);
-  addHiddenField(emailForm, "Address type", submission.addressType);
-  addHiddenField(emailForm, "Address", submission.address);
-  addHiddenField(emailForm, "Date of birth", submission.dateOfBirth);
-  addHiddenField(emailForm, "Earthquarter time", submission.displayTime);
-  addHiddenField(emailForm, "Message", submission.message);
-  addHiddenField(emailForm, "Submitted at", submission.submittedAt);
-
-  document.body.appendChild(emailForm);
-  emailForm.submit();
-  emailForm.remove();
+  return window.emailjs.send(emailJsConfig.serviceId, emailJsConfig.templateId, {
+    name: submission.name,
+    message: submission.message,
+    to_email: submission.email,
+    reply_to: emailRecipient,
+    display_time: submission.displayTime,
+    phone: submission.phone,
+    address: submission.address
+  });
 }
 
 function updateCalendarLink(submission) {
@@ -524,7 +531,7 @@ calendarLink.addEventListener("click", (event) => {
   window.location.href = calendarLink.href;
 });
 
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   if (!validateForm()) {
@@ -532,8 +539,19 @@ form.addEventListener("submit", (event) => {
   }
 
   const submission = buildSubmission();
+  submitButton.disabled = true;
+  setEmailStatus("Saving your plan and sending your Earthquarter email...", "pending");
+
   saveSubmission(submission);
-  emailSubmission(submission);
+
+  try {
+    await emailSubmission(submission);
+    setEmailStatus("Your Earthquarter email was sent successfully.", "success");
+  } catch (error) {
+    console.error(error);
+    setEmailStatus(error.message || "Your plan was saved, but the email could not be sent yet.", "error");
+  }
+
   if (savePlan.checked) {
     persistDraft(captureDraftFromForm());
   } else {
@@ -542,11 +560,18 @@ form.addEventListener("submit", (event) => {
   updateCalendarLink(submission);
   joinSuccess.hidden = false;
   joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
+  submitButton.disabled = false;
 });
 
 updatePhoneHint();
 populateCities();
 setDateLimits();
+setEmailStatus(
+  hasEmailJsConfig()
+    ? "Confirmation emails are ready to send with EmailJS."
+    : "Fill in your EmailJS keys in join.js to turn on confirmation emails.",
+  hasEmailJsConfig() ? "success" : "pending"
+);
 
 if (getCookie(rememberCookieName) === "1") {
   fillFormFromDraft(getDraft());

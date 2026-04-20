@@ -321,6 +321,12 @@ h2 em {
   transform: translateY(-2px);
 }
 
+.primary-button:disabled {
+  opacity: 0.72;
+  cursor: wait;
+  transform: none;
+}
+
 .secondary-button {
   color: var(--white);
   background: var(--leaf);
@@ -1122,6 +1128,25 @@ h2 em {
   margin: 0;
   color: var(--muted);
   font-size: 0.92rem;
+}
+
+.email-status {
+  min-height: 24px;
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.email-status.is-pending {
+  color: var(--amber);
+}
+
+.email-status.is-success {
+  color: var(--leaf);
+}
+
+.email-status.is-error {
+  color: var(--coral);
 }
 
 .save-option {
