@@ -94,8 +94,9 @@ function setEmailStatus(message, tone = "") {
     return;
   }
 
-  emailStatus.hidden = true;
-  emailStatus.textContent = "";
+  emailStatus.hidden = false;
+  emailStatus.textContent = message;
+  emailStatus.className = `email-status ${tone ? `is-${tone}` : ""}`.trim();
 }
 
 function clearErrors() {
@@ -605,7 +606,7 @@ form.addEventListener("submit", async (event) => {
   isSubmitting = true;
   const submission = buildSubmission();
   submitButton.disabled = true;
-  setEmailStatus("Saving your plan and sending your Earthquarter emails...", "pending");
+  setEmailStatus("", "");
 
   saveSubmission(submission);
 
