@@ -463,7 +463,7 @@ h2 em {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 100%;
+  object-position: center center;
 }
 
 .image-band::after {
@@ -1469,7 +1469,7 @@ h2 em {
   }
 
   .image-band img {
-    object-position: center 100%;
+    object-position: center center;
   }
 
   .image-band-copy {
