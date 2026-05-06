@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --ink: #1c1c1c;
   --muted: #56645d;
   --paper: #f5faf0;
@@ -118,96 +118,6 @@ input {
 .site-nav .nav-highlight:hover {
   color: var(--leaf-dark);
   background: #ffd579;
-}
-
-.auth-slot {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-left: auto;
-}
-
-.account-cta {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 16px;
-  color: var(--leaf-dark);
-  background: var(--sun);
-  border-radius: 999px;
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.account-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px 6px 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(200, 230, 208, 0.2);
-  border-radius: 999px;
-}
-
-.account-chip-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--white);
-  text-decoration: none;
-}
-
-.account-chip-main span {
-  display: grid;
-  line-height: 1.05;
-}
-
-.account-chip-main small {
-  color: var(--mist);
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
-.account-chip-main strong {
-  color: var(--white);
-  font-size: 0.9rem;
-  font-weight: 900;
-}
-
-.account-avatar {
-  width: 34px;
-  height: 34px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--sun);
-}
-
-.account-avatar-fallback {
-  display: inline-grid;
-  place-items: center;
-  color: var(--leaf-dark);
-  font-weight: 900;
-}
-
-.account-signout {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  padding: 0 12px;
-  color: var(--mist);
-  background: transparent;
-  border: 0;
-  border-left: 1px solid rgba(200, 230, 208, 0.18);
-  cursor: pointer;
-  font-size: 0.76rem;
-  font-weight: 800;
-  white-space: nowrap;
 }
 
 .hero {
@@ -553,7 +463,6 @@ h2 em {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
 }
 
 .image-band::after {
@@ -736,225 +645,6 @@ h2 em {
   gap: 38px;
   align-items: start;
   background: #eef6f7;
-}
-
-.challenge-section {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: min(380px, calc(100vw - 48px));
-  z-index: 18;
-}
-
-.challenge-card {
-  display: grid;
-  gap: 18px;
-  padding: 22px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid var(--line);
-  border-radius: 22px;
-  box-shadow: 0 24px 48px rgba(26, 58, 42, 0.16);
-  backdrop-filter: blur(10px);
-  max-height: calc(100vh - 120px);
-  overflow: auto;
-}
-
-.challenge-header {
-  display: grid;
-  gap: 14px;
-}
-
-.challenge-label {
-  margin: 0;
-  color: var(--coral);
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.challenge-header h2 {
-  font-size: 2rem;
-}
-
-.challenge-copy {
-  margin: 10px 0 0;
-  color: var(--muted);
-  font-size: 0.98rem;
-}
-
-.challenge-pill {
-  display: grid;
-  justify-items: center;
-  gap: 6px;
-  padding: 16px 18px;
-  background: linear-gradient(135deg, #1a3a2a, #2d5a3d);
-  border-radius: 18px;
-  color: var(--white);
-}
-
-.challenge-pill-value {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 2.2rem;
-  font-weight: 900;
-  line-height: 1;
-}
-
-.challenge-pill-label {
-  color: var(--mist);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.challenge-grid {
-  display: grid;
-  gap: 16px;
-}
-
-.streak-box {
-  display: grid;
-  gap: 12px;
-}
-
-.streak-box div {
-  padding: 18px;
-  background: linear-gradient(180deg, #f8fbf7, #eef6f0);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  text-align: center;
-}
-
-.streak-box span {
-  display: block;
-  color: var(--leaf-dark);
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 1.6rem;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.streak-box p {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-  font-weight: 800;
-}
-
-.evidence-box {
-  padding: 20px;
-  background: #f8fbf7;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-}
-
-.evidence-box h3 {
-  margin: 0;
-  color: var(--leaf-dark);
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 1.5rem;
-}
-
-.evidence-box > p {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.evidence-prompt {
-  margin-top: 14px;
-  color: var(--leaf-dark);
-  font-weight: 800;
-}
-
-.evidence-note {
-  margin-top: 10px;
-  color: var(--coral);
-  font-weight: 700;
-}
-
-.evidence-box ul {
-  margin: 14px 0 0;
-  padding-left: 18px;
-  color: var(--muted);
-  line-height: 1.75;
-}
-
-.upload-button {
-  display: inline-flex;
-  min-height: 46px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 14px;
-  padding: 11px 16px;
-  border-radius: 12px;
-  background: var(--sun);
-  color: var(--leaf-dark);
-  font-weight: 900;
-  cursor: pointer;
-  transition: transform 180ms ease, background 180ms ease;
-}
-
-.upload-button:hover {
-  background: #ffd85d;
-  transform: translateY(-2px);
-}
-
-.image-preview {
-  display: grid;
-  gap: 12px;
-  margin-top: 14px;
-}
-
-.image-preview img {
-  width: 100%;
-  max-height: 220px;
-  object-fit: cover;
-  border-radius: 14px;
-  box-shadow: 0 12px 22px rgba(26, 58, 42, 0.12);
-}
-
-.complete-button {
-  display: inline-flex;
-  min-height: 46px;
-  align-items: center;
-  justify-content: center;
-  margin-top: 16px;
-  padding: 12px 18px;
-  border: 0;
-  border-radius: 12px;
-  background: var(--leaf-dark);
-  color: var(--white);
-  cursor: pointer;
-  font-weight: 900;
-  transition: transform 180ms ease, background 180ms ease;
-}
-
-.complete-button:hover {
-  background: #10261c;
-  transform: translateY(-2px);
-}
-
-.challenge-note {
-  margin: 12px 0 0;
-  color: var(--muted);
-  font-size: 0.88rem;
-}
-
-.challenge-message {
-  padding: 16px 18px;
-  background: linear-gradient(135deg, rgba(232, 246, 234, 0.96), rgba(255, 248, 222, 0.95));
-  border-left: 5px solid var(--amber);
-  border-radius: 14px;
-  color: var(--leaf-dark);
-  font-weight: 800;
-  min-height: 64px;
-}
-
-.challenge-message.is-empty {
-  color: var(--muted);
-  font-weight: 700;
 }
 
 .steps {
@@ -1280,113 +970,6 @@ h2 em {
   color: var(--white);
 }
 
-.login-page {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(240, 192, 96, 0.18), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(74, 140, 92, 0.18), transparent 28%),
-    linear-gradient(180deg, #10261c, #1a3a2a 55%, #eef6f0 150%);
-}
-
-.login-shell {
-  min-height: calc(100vh - 70px);
-  display: grid;
-  place-items: center;
-  padding: 110px 6% 72px;
-}
-
-.login-card {
-  width: min(940px, 100%);
-  display: grid;
-  gap: 22px;
-  padding: 34px;
-  color: var(--white);
-  background: rgba(26, 58, 42, 0.88);
-  border: 1px solid rgba(200, 230, 208, 0.2);
-  border-radius: 28px;
-  box-shadow: 0 26px 54px rgba(10, 25, 18, 0.26);
-  backdrop-filter: blur(10px);
-}
-
-.login-card h1 {
-  margin: 0;
-  color: #f2f4ee;
-  font-size: clamp(2.6rem, 4vw, 4.6rem);
-}
-
-.login-copy {
-  max-width: 720px;
-  margin: 0;
-  color: var(--mist);
-  font-size: 1.12rem;
-  line-height: 1.8;
-}
-
-.login-signin-panel {
-  display: grid;
-  gap: 14px;
-  max-width: 420px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(200, 230, 208, 0.14);
-  border-radius: 22px;
-}
-
-.login-status {
-  margin: 0;
-  min-height: 24px;
-  color: var(--mist);
-  font-size: 0.96rem;
-  font-weight: 800;
-}
-
-.login-status.is-pending {
-  color: var(--sun);
-}
-
-.login-status.is-success {
-  color: #bdf0c9;
-}
-
-.login-status.is-warning {
-  color: #ffd8a3;
-}
-
-.login-summary {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 18px;
-  align-items: center;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(200, 230, 208, 0.14);
-  border-radius: 22px;
-}
-
-.login-summary img {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  object-fit: cover;
-  background: var(--sun);
-}
-
-.login-summary h2 {
-  color: var(--paper);
-  font-size: 2rem;
-}
-
-.login-summary p {
-  margin: 8px 0 0;
-  color: var(--mist);
-}
-
-.login-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
 .join-section img {
   width: 100%;
   height: 440px;
@@ -1547,25 +1130,6 @@ h2 em {
   font-size: 0.92rem;
 }
 
-.email-status {
-  min-height: 24px;
-  margin: 2px 0 0;
-  font-size: 0.92rem;
-  font-weight: 800;
-}
-
-.email-status.is-pending {
-  color: var(--amber);
-}
-
-.email-status.is-success {
-  color: var(--leaf);
-}
-
-.email-status.is-error {
-  color: var(--coral);
-}
-
 .save-option {
   display: flex;
   align-items: center;
@@ -1715,10 +1279,6 @@ h2 em {
     scrollbar-width: thin;
   }
 
-  .auth-slot {
-    margin-left: 0;
-    justify-content: flex-end;
-  }
 
   .site-nav a {
     padding: 7px 8px;
@@ -1766,18 +1326,6 @@ h2 em {
   }
 }
 
-@media (max-width: 1100px) {
-  .challenge-section {
-    position: static;
-    width: auto;
-    padding: 72px 6%;
-  }
-
-  .challenge-card {
-    max-height: none;
-  }
-}
-
 @media (max-width: 560px) {
   .site-header {
     min-height: 70px;
@@ -1803,19 +1351,8 @@ h2 em {
     justify-content: flex-start;
   }
 
-  .auth-slot {
-    width: 100%;
-    justify-content: flex-start;
-  }
 
-  .account-chip {
-    width: 100%;
-    justify-content: space-between;
-  }
 
-  .account-chip-main {
-    min-width: 0;
-  }
 
   .site-nav a {
     min-height: 34px;
@@ -1836,9 +1373,6 @@ h2 em {
     padding-right: 5%;
   }
 
-  .challenge-section {
-    padding: 58px 5%;
-  }
 
   .hero {
     min-height: 100vh;
@@ -1906,24 +1440,9 @@ h2 em {
     padding: 20px;
   }
 
-  .login-card {
-    padding: 22px;
-  }
 
-  .login-summary {
-    grid-template-columns: 1fr;
-    justify-items: start;
-  }
 
-  .login-summary img {
-    width: 68px;
-    height: 68px;
-  }
 
-  .integration-actions,
-  .secondary-link {
-    width: 100%;
-  }
 
   .mini-circuit strong {
     white-space: normal;
@@ -1933,9 +1452,6 @@ h2 em {
     min-height: 470px;
   }
 
-  .image-band img {
-    object-position: center center;
-  }
 
   .image-band-copy {
     padding-left: 5%;
@@ -1952,7 +1468,9 @@ h2 em {
     max-height: 460px;
   }
 
+
   .site-footer {
     flex-direction: column;
   }
 }
+

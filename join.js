@@ -1,4 +1,4 @@
-const form = document.getElementById("earthquarterJoinForm");
+﻿const form = document.getElementById("earthquarterJoinForm");
 const countryCode = document.getElementById("countryCode");
 const dialCode = document.getElementById("dialCode");
 const phoneNumber = document.getElementById("phoneNumber");
@@ -15,19 +15,11 @@ const savePlan = document.getElementById("savePlan");
 const joinSuccess = document.getElementById("joinSuccess");
 const successSummary = document.getElementById("successSummary");
 const calendarLink = document.getElementById("calendarLink");
-const emailStatus = document.getElementById("emailStatus");
 const submitButton = form.querySelector('button[type="submit"]');
-const emailRecipient = "earthquarter24@gmail.com";
 const formSubmitRecipient = "earthquarter24@gmail.com";
 const draftStorageKey = "earthquarterSavedPlan";
 const rememberCookieName = "earthquarterRememberPlan";
 let isSubmitting = false;
-const emailJsConfig = {
-  publicKey: "oWzdB-OXZ5v0zw0_F",
-  serviceId: "gmail_earthquarter",
-  templateId: "template_b1qj1hj"
-};
-
 const citiesByRegion = {
   "Andaman and Nicobar Islands": ["Port Blair", "Diglipur", "Mayabunder", "Rangat", "Hut Bay", "Car Nicobar", "Other city/town"],
   "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Tirupati", "Rajahmundry", "Kakinada", "Anantapur", "Other city/town"],
@@ -89,40 +81,10 @@ function setError(id, message) {
   }
 }
 
-function setEmailStatus(message, tone = "") {
-  if (!emailStatus) {
-    return;
-  }
-
-  emailStatus.hidden = false;
-  emailStatus.textContent = message;
-  emailStatus.className = `email-status ${tone ? `is-${tone}` : ""}`.trim();
-}
-
 function clearErrors() {
   ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "switchMessage"].forEach((id) => {
     setError(id, "");
   });
-}
-
-function hasEmailJsConfig() {
-  return Object.values(emailJsConfig).every((value) => value && !value.startsWith("YOUR_EMAILJS_"));
-}
-
-function initEmailJs() {
-  if (!window.emailjs || !hasEmailJsConfig()) {
-    return false;
-  }
-
-  window.emailjs.init({
-    publicKey: emailJsConfig.publicKey,
-    limitRate: {
-      id: "earthquarter-join",
-      throttle: 1000
-    }
-  });
-
-  return true;
 }
 
 function onlyDigits(value) {
@@ -474,32 +436,6 @@ async function sendAdminSubmission(submission) {
   window.setTimeout(() => adminForm.remove(), 1000);
 }
 
-function buildEmailParams(submission) {
-  return {
-    name: submission.name,
-    message: submission.message,
-    email: submission.email,
-    reply_to: emailRecipient,
-    subject: `Thank you for joining Earthquarter, ${submission.name}`,
-    display_time: submission.displayTime,
-    phone: submission.phone,
-    address: submission.address,
-    sender_email: emailRecipient
-  };
-}
-
-async function emailSubmission(submission) {
-  if (!initEmailJs()) {
-    throw new Error("EmailJS is not configured yet. Add your public key, service ID, and template ID in join.js.");
-  }
-
-  return window.emailjs.send(
-    emailJsConfig.serviceId,
-    emailJsConfig.templateId,
-    buildEmailParams(submission)
-  );
-}
-
 function updateCalendarLink(submission) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
   const startDate = nextCalendarStart(submission.time);
@@ -606,20 +542,12 @@ form.addEventListener("submit", async (event) => {
   isSubmitting = true;
   const submission = buildSubmission();
   submitButton.disabled = true;
-  setEmailStatus("", "");
-
   saveSubmission(submission);
 
   try {
     await sendAdminSubmission(submission);
-    await emailSubmission(submission);
-    setEmailStatus("Your plan was submitted successfully.", "success");
   } catch (error) {
     console.error(error);
-    setEmailStatus(error.message || "Your plan was saved, but one of the emails could not be sent yet.", "error");
-  } finally {
-    isSubmitting = false;
-    submitButton.disabled = false;
   }
 
   if (savePlan.checked) {
@@ -635,17 +563,9 @@ form.addEventListener("submit", async (event) => {
 updatePhoneHint();
 populateCities();
 setDateLimits();
-setEmailStatus(
-  hasEmailJsConfig()
-    ? "Welcome email is ready to send with EmailJS."
-    : "Fill in your EmailJS keys in join.js to turn on the welcome email.",
-  hasEmailJsConfig() ? "success" : "pending"
-);
-
 if (getCookie(rememberCookieName) === "1") {
   fillFormFromDraft(getDraft());
 }
 
-if (window.EarthquarterAuth) {
-  window.EarthquarterAuth.prefillJoinForm(fullName, emailAddress);
-}
+
+

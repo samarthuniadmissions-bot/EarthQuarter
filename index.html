@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -11,8 +11,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="top" aria-hidden="true"></div>
-  <header class="site-header">
+  <header class="site-header" id="top">
     <a class="brand" href="#top" aria-label="Earthquarter home">
       <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
     </a>
@@ -20,11 +19,9 @@
       <a href="#action">Action</a>
       <a href="#facts">Facts</a>
       <a href="#impact">Impact</a>
-      <a href="#challenge">Challenge</a>
       <a href="#faq">FAQ</a>
       <a class="nav-highlight" href="join.html">Join</a>
     </nav>
-    <div class="auth-slot" id="authSlot" aria-label="Account"></div>
   </header>
 
   <main>
@@ -68,7 +65,7 @@
     </section>
 
     <section class="image-band" aria-labelledby="practice-title">
-      <img src="arturo_anez-bulb-7746884.jpg" alt="A glowing light bulb with green leaves symbolizing energy saving">
+      <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80" alt="A classroom with students and computers">
       <div class="image-band-copy">
         <p class="eyebrow">Everyday practice</p>
         <h2 id="practice-title">Small actions become shared habits.</h2>
@@ -146,63 +143,6 @@
       </div>
     </section>
 
-    <section class="challenge-section" id="challenge" aria-labelledby="challenge-title">
-      <div class="challenge-card">
-        <div class="challenge-header">
-          <div>
-            <p class="challenge-label">Challenge Mode</p>
-            <h2 id="challenge-title">Weekly Earthquarter Check-In</h2>
-            <p class="challenge-copy">Completed your 15-minute switch-off? Upload a quick photo as your Earthquarter evidence and continue your weekly streak.</p>
-          </div>
-          <div class="challenge-pill">
-            <span class="challenge-pill-value" id="weekCount">0</span>
-            <span class="challenge-pill-label">Current Streak</span>
-          </div>
-        </div>
-
-        <div class="challenge-grid">
-          <div class="streak-box">
-            <div>
-              <span id="badgeName">🌱 Starter</span>
-              <p>Current Badge</p>
-            </div>
-            <div>
-              <span id="nextBadgeLabel">⚡ 4 Weeks</span>
-              <p>Next Milestone</p>
-            </div>
-          </div>
-
-          <div class="evidence-box">
-            <h3>🌱 Upload Your Earthquarter Evidence</h3>
-            <p>Evidence helps make the movement real.</p>
-            <p class="evidence-prompt">Take a quick photo showing your Earthquarter moment:</p>
-            <ul>
-              <li>Switched-off lights</li>
-              <li>Unplugged devices</li>
-              <li>Your classroom or home participating</li>
-              <li>Your quiet 15-minute environment</li>
-            </ul>
-            <p class="evidence-note">Your upload motivates others to participate too.</p>
-
-            <label class="upload-button" for="evidencePhoto">
-              Upload Evidence Photo
-            </label>
-            <input type="file" id="evidencePhoto" accept="image/*" hidden>
-
-            <div class="image-preview" id="imagePreview" aria-live="polite"></div>
-
-            <button id="completeChallenge" class="complete-button" type="button">
-              Complete This Week
-            </button>
-
-            <p class="challenge-note">Your photo will be emailed to Earthquarter after you complete this week.</p>
-          </div>
-        </div>
-
-        <div id="challengeMessage" class="challenge-message" aria-live="polite"></div>
-      </div>
-    </section>
-
     <section class="calculator-section" id="facts" aria-labelledby="calculator-title">
       <div class="section-heading">
         <p class="eyebrow">15-minute facts</p>
@@ -246,16 +186,16 @@
 
       </div>
 
-      <div class="fact-grid">
+      <div class="fact-grid" aria-label="Quick Earthquarter facts">
         <article class="fact-card">
           <span id="sessionKwh">0.023 kWh</span>
-          <h3>saved in one 15-minute action</h3>
-          <p>Small for one room, powerful when a whole class or school joins.</p>
+          <h3>for one 15-minute switch-off</h3>
+          <p>This is the amount saved by 10 LED bulbs using 9 watts each.</p>
         </article>
         <article class="fact-card">
           <span id="yearlyKwh">1.17 kWh</span>
-          <h3>saved in a year at this weekly pace</h3>
-          <p>Weekly repetition turns a short pause into a visible habit.</p>
+          <h3>if you do it once a week</h3>
+          <p>Repetition turns a small action into a consistent yearly habit.</p>
         </article>
         <article class="fact-card">
           <span id="communityKwh">117 kWh</span>
@@ -372,8 +312,6 @@
     <a href="#top">Back to top</a>
   </footer>
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="auth.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
