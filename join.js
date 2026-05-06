@@ -645,3 +645,7 @@ setEmailStatus(
 if (getCookie(rememberCookieName) === "1") {
   fillFormFromDraft(getDraft());
 }
+
+if (window.EarthquarterAuth) {
+  window.EarthquarterAuth.prefillJoinForm(fullName, emailAddress);
+}

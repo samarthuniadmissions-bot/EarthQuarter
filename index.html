@@ -24,6 +24,7 @@
       <a href="#faq">FAQ</a>
       <a class="nav-highlight" href="join.html">Join</a>
     </nav>
+    <div class="auth-slot" id="authSlot" aria-label="Account"></div>
   </header>
 
   <main>
@@ -174,12 +175,14 @@
           <div class="evidence-box">
             <h3>🌱 Upload Your Earthquarter Evidence</h3>
             <p>Evidence helps make the movement real.</p>
+            <p class="evidence-prompt">Take a quick photo showing your Earthquarter moment:</p>
             <ul>
               <li>Switched-off lights</li>
-              <li>Unplugged chargers</li>
+              <li>Unplugged devices</li>
               <li>Your classroom or home participating</li>
               <li>Your quiet 15-minute environment</li>
             </ul>
+            <p class="evidence-note">Your upload motivates others to participate too.</p>
 
             <label class="upload-button" for="evidencePhoto">
               Upload Evidence Photo
@@ -192,7 +195,7 @@
               Complete This Week
             </button>
 
-            <p class="challenge-note">Your photo stays in this browser only unless you choose to share it elsewhere.</p>
+            <p class="challenge-note">Your photo will be emailed to Earthquarter after you complete this week.</p>
           </div>
         </div>
 
@@ -369,6 +372,8 @@
     <a href="#top">Back to top</a>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="auth.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
