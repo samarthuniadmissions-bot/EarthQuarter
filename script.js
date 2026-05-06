@@ -22,6 +22,13 @@ const weekCount = document.getElementById("weekCount");
 const badgeName = document.getElementById("badgeName");
 const nextBadgeLabel = document.getElementById("nextBadgeLabel");
 const challengeStorageKey = "earthquarterChallengeCheckin";
+const joinSubmissionStorageKey = "earthquarterJoinSubmissions";
+const challengeEmailConfig = {
+  publicKey: "YOUR_EMAILJS_PUBLIC_KEY",
+  serviceId: "YOUR_EMAILJS_SERVICE_ID",
+  templateId: "YOUR_EVIDENCE_TEMPLATE_ID"
+};
+const challengeEmailRecipient = "earthquarter24@gmail.com";
 
 const totalSeconds = 15 * 60;
 let secondsLeft = totalSeconds;
@@ -143,6 +150,39 @@ function loadChallengeProgress() {
 
 function saveChallengeProgress(progress) {
   localStorage.setItem(challengeStorageKey, JSON.stringify(progress));
+}
+
+function loadLatestJoinSubmission() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(joinSubmissionStorageKey) || "[]");
+    if (Array.isArray(saved) && saved.length > 0) {
+      return saved[saved.length - 1];
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function hasChallengeEmailConfig() {
+  return Object.values(challengeEmailConfig).every((value) => value && !value.startsWith("YOUR_"));
+}
+
+function initChallengeEmailJs() {
+  if (!window.emailjs || !hasChallengeEmailConfig()) {
+    return false;
+  }
+
+  window.emailjs.init({
+    publicKey: challengeEmailConfig.publicKey,
+    limitRate: {
+      id: "earthquarter-evidence",
+      throttle: 1000
+    }
+  });
+
+  return true;
 }
 
 function getIsoWeekKey(date = new Date()) {
@@ -280,28 +320,54 @@ function completeWeeklyChallenge() {
     return;
   }
 
-  const updatedProgress = {
-    ...progress,
-    weeks: (Number(progress.weeks) || 0) + 1,
-    lastWeekKey: currentWeekKey,
-    photoDataUrl: challengeDraftPhoto,
-    photoName: challengeDraftPhotoName,
-  };
-
-  updatedProgress.badge = getBadgeName(updatedProgress.weeks);
-
-  try {
-    saveChallengeProgress(updatedProgress);
-  } catch (error) {
-    console.error(error);
-    setChallengeMessage("Your check-in was completed, but the browser could not save it. Try a smaller photo.", "warning");
+  if (!initChallengeEmailJs()) {
+    setChallengeMessage("Add your EmailJS keys in script.js to send evidence photos to Earthquarter.", "warning");
     return;
   }
 
-  challengeDraftPhoto = "";
-  challengeDraftPhotoName = "";
-  challengePhotoInput.value = "";
-  renderChallengeState(updatedProgress);
+  const savedJoin = loadLatestJoinSubmission() || {};
+  const nextWeekNumber = (Number(progress.weeks) || 0) + 1;
+  const emailPayload = {
+    name: savedJoin.name || (window.EarthquarterAuth && window.EarthquarterAuth.readProfile() ? window.EarthquarterAuth.readProfile().name : "Earthquarter member"),
+    message: savedJoin.message || `Completed Week ${nextWeekNumber} of Earthquarter and uploaded evidence.`,
+    to_email: challengeEmailRecipient,
+    reply_to: savedJoin.email || (window.EarthquarterAuth && window.EarthquarterAuth.readProfile() ? window.EarthquarterAuth.readProfile().email : challengeEmailRecipient),
+    week: String(nextWeekNumber),
+    badge: getBadgeName(nextWeekNumber),
+    photo_name: challengeDraftPhotoName || "earthquarter-evidence.png",
+    image: challengeDraftPhoto
+  };
+
+  setChallengeMessage("Sending your evidence photo to Earthquarter...", "empty");
+
+  window.emailjs.send(
+    challengeEmailConfig.serviceId,
+    challengeEmailConfig.templateId,
+    emailPayload
+  ).then(() => {
+    const updatedProgress = {
+      ...progress,
+      weeks: nextWeekNumber,
+      lastWeekKey: currentWeekKey,
+      badge: getBadgeName(nextWeekNumber),
+      photoDataUrl: challengeDraftPhoto,
+      photoName: challengeDraftPhotoName
+    };
+
+    saveChallengeProgress(updatedProgress);
+
+    challengeDraftPhoto = "";
+    challengeDraftPhotoName = "";
+    challengePhotoInput.value = "";
+    renderChallengeState(updatedProgress);
+    setChallengeMessage(
+      `✅ Earthquarter completed successfully! You’ve completed Week ${updatedProgress.weeks}. Badge unlocked: ${updatedProgress.badge}.`,
+      "success"
+    );
+  }).catch((error) => {
+    console.error(error);
+    setChallengeMessage("We could not send the evidence photo yet. Please try again.", "warning");
+  });
 }
 
 function revealWhenVisible() {
