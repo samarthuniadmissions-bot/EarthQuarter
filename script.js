@@ -14,10 +14,20 @@ const communityKwh = document.getElementById("communityKwh");
 const wasteYearText = document.getElementById("wasteYearText");
 const wasteMeterFill = document.getElementById("wasteMeterFill");
 const wasteMeterLabel = document.getElementById("wasteMeterLabel");
+const challengePhotoInput = document.getElementById("evidencePhoto");
+const imagePreview = document.getElementById("imagePreview");
+const completeChallenge = document.getElementById("completeChallenge");
+const challengeMessage = document.getElementById("challengeMessage");
+const weekCount = document.getElementById("weekCount");
+const badgeName = document.getElementById("badgeName");
+const nextBadgeLabel = document.getElementById("nextBadgeLabel");
+const challengeStorageKey = "earthquarterChallengeCheckin";
 
 const totalSeconds = 15 * 60;
 let secondsLeft = totalSeconds;
 let timerId = null;
+let challengeDraftPhoto = "";
+let challengeDraftPhotoName = "";
 
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
@@ -105,8 +115,197 @@ function updateLightSavings(event) {
   savingsResult.textContent = `${lights} light${lights === 1 ? "" : "s"} using ${watts} watt${watts === 1 ? "" : "s"} each save about ${formatKwh(perSession)} kWh every Earthquarter. Completing ${sessions} Earthquarter${sessions === 1 ? "" : "s"} per week saves about ${formatKwh(perYear)} kWh in a year.`;
 }
 
+function getChallengeDefaults() {
+  return {
+    weeks: 0,
+    lastWeekKey: "",
+    badge: "🌱 Starter",
+    photoDataUrl: "",
+    photoName: ""
+  };
+}
+
+function loadChallengeProgress() {
+  try {
+    const raw = localStorage.getItem(challengeStorageKey);
+    if (!raw) {
+      return getChallengeDefaults();
+    }
+
+    return {
+      ...getChallengeDefaults(),
+      ...JSON.parse(raw)
+    };
+  } catch {
+    return getChallengeDefaults();
+  }
+}
+
+function saveChallengeProgress(progress) {
+  localStorage.setItem(challengeStorageKey, JSON.stringify(progress));
+}
+
+function getIsoWeekKey(date = new Date()) {
+  const utc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNumber = utc.getUTCDay() || 7;
+  utc.setUTCDate(utc.getUTCDate() + 4 - dayNumber);
+  const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
+  const weekNumber = Math.ceil((((utc - yearStart) / 86400000) + 1) / 7);
+  return `${utc.getUTCFullYear()}-W${String(weekNumber).padStart(2, "0")}`;
+}
+
+function getBadgeName(weeks) {
+  if (weeks >= 10) {
+    return "🏆 Energy Hero";
+  }
+
+  if (weeks >= 4) {
+    return "⚡ Consistent Saver";
+  }
+
+  return "🌱 Starter";
+}
+
+function getNextMilestone(weeks) {
+  if (weeks < 4) {
+    return "⚡ 4 Weeks";
+  }
+
+  if (weeks < 10) {
+    return "🏆 10 Weeks";
+  }
+
+  return "🌍 Keep Going";
+}
+
+function setChallengeMessage(message, state = "neutral") {
+  challengeMessage.textContent = message;
+  challengeMessage.className = "challenge-message";
+  challengeMessage.style.borderLeftColor = "";
+
+  if (state === "empty") {
+    challengeMessage.classList.add("is-empty");
+    return;
+  }
+
+  if (state === "success") {
+    challengeMessage.style.borderLeftColor = "var(--leaf)";
+    return;
+  }
+
+  if (state === "warning") {
+    challengeMessage.style.borderLeftColor = "var(--coral)";
+    return;
+  }
+
+  challengeMessage.style.borderLeftColor = "var(--amber)";
+}
+
+function renderChallengePreview(photoDataUrl, photoName = "") {
+  if (!photoDataUrl) {
+    imagePreview.innerHTML = "";
+    return;
+  }
+
+  imagePreview.innerHTML = `
+    <img src="${photoDataUrl}" alt="Earthquarter evidence preview">
+    ${photoName ? `<p class="challenge-note">Ready to submit: ${photoName}</p>` : ""}
+  `;
+}
+
+function renderChallengeState(progress) {
+  weekCount.textContent = String(progress.weeks || 0);
+  badgeName.textContent = progress.badge || getBadgeName(progress.weeks || 0);
+  nextBadgeLabel.textContent = getNextMilestone(progress.weeks || 0);
+
+  if (progress.photoDataUrl) {
+    renderChallengePreview(progress.photoDataUrl, progress.photoName);
+  } else if (!challengeDraftPhoto) {
+    renderChallengePreview("");
+  }
+
+  if ((progress.weeks || 0) === 0) {
+    setChallengeMessage("Upload a quick photo to begin your Earthquarter streak.", "empty");
+    return;
+  }
+
+  setChallengeMessage(
+    `✅ Earthquarter completed successfully! You’ve completed Week ${progress.weeks}. Badge unlocked: ${progress.badge || getBadgeName(progress.weeks)}.`,
+    "success"
+  );
+}
+
+function handleEvidenceUpload() {
+  const file = challengePhotoInput.files && challengePhotoInput.files[0];
+
+  if (!file) {
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    setChallengeMessage("Please choose an image file for your Earthquarter evidence.", "warning");
+    challengePhotoInput.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    challengeDraftPhoto = String(reader.result || "");
+    challengeDraftPhotoName = file.name;
+    renderChallengePreview(challengeDraftPhoto, challengeDraftPhotoName);
+    setChallengeMessage("Photo ready. Tap Complete This Week when you’re ready.", "empty");
+  };
+
+  reader.onerror = () => {
+    setChallengeMessage("We couldn’t read that image. Please try another photo.", "warning");
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function completeWeeklyChallenge() {
+  const progress = loadChallengeProgress();
+
+  if (!challengeDraftPhoto) {
+    setChallengeMessage("Please upload your Earthquarter evidence photo first.", "warning");
+    challengePhotoInput.focus();
+    return;
+  }
+
+  const currentWeekKey = getIsoWeekKey();
+
+  if (progress.lastWeekKey === currentWeekKey) {
+    setChallengeMessage("You already completed this week’s Earthquarter check-in. Come back next week for a new one.", "warning");
+    return;
+  }
+
+  const updatedProgress = {
+    ...progress,
+    weeks: (Number(progress.weeks) || 0) + 1,
+    lastWeekKey: currentWeekKey,
+    photoDataUrl: challengeDraftPhoto,
+    photoName: challengeDraftPhotoName,
+  };
+
+  updatedProgress.badge = getBadgeName(updatedProgress.weeks);
+
+  try {
+    saveChallengeProgress(updatedProgress);
+  } catch (error) {
+    console.error(error);
+    setChallengeMessage("Your check-in was completed, but the browser could not save it. Try a smaller photo.", "warning");
+    return;
+  }
+
+  challengeDraftPhoto = "";
+  challengeDraftPhotoName = "";
+  challengePhotoInput.value = "";
+  renderChallengeState(updatedProgress);
+}
+
 function revealWhenVisible() {
-  const revealItems = document.querySelectorAll(".fact-card, .faq-item");
+  const revealItems = document.querySelectorAll(".fact-card, .faq-item, .challenge-card");
 
   if (!("IntersectionObserver" in window)) {
     revealItems.forEach((item) => item.classList.add("is-visible"));
@@ -131,6 +330,9 @@ document.querySelectorAll(".checklist input").forEach((input) => {
   });
 });
 
+challengePhotoInput.addEventListener("change", handleEvidenceUpload);
+completeChallenge.addEventListener("click", completeWeeklyChallenge);
+
 startTimer.addEventListener("click", startCountdown);
 resetTimer.addEventListener("click", resetCountdown);
 lightsForm.addEventListener("submit", updateLightSavings);
@@ -146,4 +348,5 @@ document.querySelectorAll(".faq-question").forEach((button) => {
 
 renderTimer();
 updateLightSavings();
+renderChallengeState(loadChallengeProgress());
 revealWhenVisible();

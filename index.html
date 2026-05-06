@@ -20,6 +20,7 @@
       <a href="#action">Action</a>
       <a href="#facts">Facts</a>
       <a href="#impact">Impact</a>
+      <a href="#challenge">Challenge</a>
       <a href="#faq">FAQ</a>
       <a class="nav-highlight" href="join.html">Join</a>
     </nav>
@@ -141,6 +142,61 @@
           <h3>Share the habit</h3>
           <p>Invite students to bring the same awareness into their families.</p>
         </article>
+      </div>
+    </section>
+
+    <section class="challenge-section" id="challenge" aria-labelledby="challenge-title">
+      <div class="challenge-card">
+        <div class="challenge-header">
+          <div>
+            <p class="challenge-label">Challenge Mode</p>
+            <h2 id="challenge-title">Weekly Earthquarter Check-In</h2>
+            <p class="challenge-copy">Completed your 15-minute switch-off? Upload a quick photo as your Earthquarter evidence and continue your weekly streak.</p>
+          </div>
+          <div class="challenge-pill">
+            <span class="challenge-pill-value" id="weekCount">0</span>
+            <span class="challenge-pill-label">Current Streak</span>
+          </div>
+        </div>
+
+        <div class="challenge-grid">
+          <div class="streak-box">
+            <div>
+              <span id="badgeName">🌱 Starter</span>
+              <p>Current Badge</p>
+            </div>
+            <div>
+              <span id="nextBadgeLabel">⚡ 4 Weeks</span>
+              <p>Next Milestone</p>
+            </div>
+          </div>
+
+          <div class="evidence-box">
+            <h3>🌱 Upload Your Earthquarter Evidence</h3>
+            <p>Evidence helps make the movement real.</p>
+            <ul>
+              <li>Switched-off lights</li>
+              <li>Unplugged chargers</li>
+              <li>Your classroom or home participating</li>
+              <li>Your quiet 15-minute environment</li>
+            </ul>
+
+            <label class="upload-button" for="evidencePhoto">
+              Upload Evidence Photo
+            </label>
+            <input type="file" id="evidencePhoto" accept="image/*" hidden>
+
+            <div class="image-preview" id="imagePreview" aria-live="polite"></div>
+
+            <button id="completeChallenge" class="complete-button" type="button">
+              Complete This Week
+            </button>
+
+            <p class="challenge-note">Your photo stays in this browser only unless you choose to share it elsewhere.</p>
+          </div>
+        </div>
+
+        <div id="challengeMessage" class="challenge-message" aria-live="polite"></div>
       </div>
     </section>
 
