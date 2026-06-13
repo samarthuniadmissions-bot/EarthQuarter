@@ -183,7 +183,13 @@
         </label>
         <p class="form-note">When this is on, your details come back the next time you visit this page on the same browser.</p>
 
-        <button class="primary-button" type="submit">Save my plan</button>
+        
+<div class="pledge-card">
+<h2>EARTHQUARTER PLEDGE</h2>
+<p>I pledge to be a responsible energy user and an active participant in the Earthquarter initiative. I will participate in the weekly 15‑minute Earthquarter activity, encourage others to do the same, and upload photo evidence of my participation after each completed session.</p>
+<label><input type="checkbox" id="pledgeAgree"> I have read and agree to the Earthquarter Pledge</label>
+</div>
+<button class="primary-button" id="joinBtn" type="submit" disabled>Save my plan</button><script>document.addEventListener("DOMContentLoaded",()=>{const c=document.getElementById("pledgeAgree"),b=document.getElementById("joinBtn");if(c&&b){c.onchange=()=>b.disabled=!c.checked;}})</script>
       </form>
 
       <div class="join-success" id="joinSuccess" hidden>
