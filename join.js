@@ -555,7 +555,7 @@ form.addEventListener("submit", async (event) => {
   } else {
     clearDraft();
   }
-  saveEarthquarterUser(submission); sendParticipantEmail(submission); updateCalendarLink(submission);
+  updateCalendarLink(submission);
   joinSuccess.hidden = false;
   joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
 });
@@ -569,25 +569,3 @@ if (getCookie(rememberCookieName) === "1") {
 
 
 
-
-
-// EarthQuarter enhancements
-function saveEarthquarterUser(submission){localStorage.setItem('earthquarterUser',JSON.stringify({name:submission.name,email:submission.email,nextSession:submission.displayTime,sessionsCompleted:0,evidenceSubmitted:0,badge:'None'}));}
-
-
-// EmailJS Integration
-if (typeof emailjs !== 'undefined') {
-  emailjs.init("oWzdB-OXZ5v0zw0_F");
-}
-async function sendParticipantEmail(submission){
- if(typeof emailjs==='undefined') return;
- try{
-  await emailjs.send("gmail_earthquarter","template_b1qj1hj",{
-   to_email: submission.email,
-   user_name: submission.name,
-   earthquarter_time: submission.displayTime,
-   user_city: submission.city,
-   user_state: submission.region
-  });
- }catch(e){console.error(e);}
-}
