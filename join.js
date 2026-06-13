@@ -1,3 +1,15 @@
+
+async function sendParticipantEmail(submission){
+ return emailjs.send("gmail_earthquarter","template_b1qj1hj",{
+   to_email: submission.email,
+   user_name: submission.name,
+   earthquarter_time: submission.displayTime,
+   user_city: submission.city,
+   user_state: submission.region
+ });
+}
+
+emailjs.init("oWzdB-OXZ5v0zw0_F");
 ﻿const form = document.getElementById("earthquarterJoinForm");
 const countryCode = document.getElementById("countryCode");
 const dialCode = document.getElementById("dialCode");
@@ -16,7 +28,6 @@ const joinSuccess = document.getElementById("joinSuccess");
 const successSummary = document.getElementById("successSummary");
 const calendarLink = document.getElementById("calendarLink");
 const submitButton = form.querySelector('button[type="submit"]');
-const formSubmitRecipient = "earthquarter24@gmail.com";
 const draftStorageKey = "earthquarterSavedPlan";
 const rememberCookieName = "earthquarterRememberPlan";
 let isSubmitting = false;
@@ -392,49 +403,7 @@ function buildFormSubmitUrl(recipient) {
   return `https://formsubmit.co/${encodeURIComponent(recipient)}`;
 }
 
-async function sendAdminSubmission(submission) {
-  let iframe = document.getElementById("earthquarterFormSubmitFrame");
 
-  if (!iframe) {
-    iframe = document.createElement("iframe");
-    iframe.id = "earthquarterFormSubmitFrame";
-    iframe.name = "earthquarterFormSubmitFrame";
-    iframe.hidden = true;
-    document.body.appendChild(iframe);
-  }
-
-  const adminForm = document.createElement("form");
-  adminForm.method = "POST";
-  adminForm.action = buildFormSubmitUrl(formSubmitRecipient);
-  adminForm.target = "earthquarterFormSubmitFrame";
-  adminForm.hidden = true;
-
-  const addField = (name, value) => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    adminForm.appendChild(input);
-  };
-
-  addField("Name", submission.name);
-  addField("Phone", submission.phone);
-  addField("Email", submission.email);
-  addField("Country", submission.country);
-  addField("Address type", submission.addressType);
-  addField("Address", submission.address);
-  addField("Date of birth", submission.dateOfBirth);
-  addField("Earthquarter time", submission.displayTime);
-  addField("Message", submission.message);
-  addField("Submitted at", submission.submittedAt);
-  addField("_subject", `New Earthquarter submission from ${submission.name}`);
-  addField("_captcha", "false");
-  addField("_template", "table");
-
-  document.body.appendChild(adminForm);
-  adminForm.submit();
-  window.setTimeout(() => adminForm.remove(), 1000);
-}
 
 function updateCalendarLink(submission) {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
@@ -545,7 +514,7 @@ form.addEventListener("submit", async (event) => {
   saveSubmission(submission);
 
   try {
-    await sendAdminSubmission(submission);
+    await sendParticipantEmail(submission);
   } catch (error) {
     console.error(error);
   }
@@ -555,7 +524,7 @@ form.addEventListener("submit", async (event) => {
   } else {
     clearDraft();
   }
-  saveEarthquarterUser(submission); sendParticipantEmail(submission); updateCalendarLink(submission);
+  saveEarthquarterUser(submission); updateCalendarLink(submission);
   joinSuccess.hidden = false;
   joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
 });
@@ -573,21 +542,3 @@ if (getCookie(rememberCookieName) === "1") {
 
 // EarthQuarter enhancements
 function saveEarthquarterUser(submission){localStorage.setItem('earthquarterUser',JSON.stringify({name:submission.name,email:submission.email,nextSession:submission.displayTime,sessionsCompleted:0,evidenceSubmitted:0,badge:'None'}));}
-
-
-// EmailJS Integration
-if (typeof emailjs !== 'undefined') {
-  emailjs.init("oWzdB-OXZ5v0zw0_F");
-}
-async function sendParticipantEmail(submission){
- if(typeof emailjs==='undefined') return;
- try{
-  await emailjs.send("gmail_earthquarter","template_b1qj1hj",{
-   to_email: submission.email,
-   user_name: submission.name,
-   earthquarter_time: submission.displayTime,
-   user_city: submission.city,
-   user_state: submission.region
-  });
- }catch(e){console.error(e);}
-}
