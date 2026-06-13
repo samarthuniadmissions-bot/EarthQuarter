@@ -146,3 +146,6 @@ document.querySelectorAll(".faq-question").forEach((button) => {
 renderTimer();
 updateLightSavings();
 revealWhenVisible();
+
+
+try{const u=JSON.parse(localStorage.getItem('earthquarterUser')||'null');if(u){console.log('Earthquarter user loaded',u.name);}}catch(e){}
