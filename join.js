@@ -555,7 +555,7 @@ form.addEventListener("submit", async (event) => {
   } else {
     clearDraft();
   }
-  updateCalendarLink(submission);
+  saveEarthquarterUser(submission); updateCalendarLink(submission);
   joinSuccess.hidden = false;
   joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
 });
@@ -569,3 +569,7 @@ if (getCookie(rememberCookieName) === "1") {
 
 
 
+
+
+// EarthQuarter enhancements
+function saveEarthquarterUser(submission){localStorage.setItem('earthquarterUser',JSON.stringify({name:submission.name,email:submission.email,nextSession:submission.displayTime,sessionsCompleted:0,evidenceSubmitted:0,badge:'None'}));}
