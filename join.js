@@ -15,10 +15,12 @@ const savePlan = document.getElementById("savePlan");
 const joinSuccess = document.getElementById("joinSuccess");
 const successSummary = document.getElementById("successSummary");
 const calendarLink = document.getElementById("calendarLink");
+const dashboardLink = document.getElementById("dashboardLink");
+const emailStatus = document.getElementById("emailStatus");
 const submitButton = form.querySelector('button[type="submit"]');
-const formSubmitRecipient = "earthquarter24@gmail.com";
+const app = window.EarthquarterApp;
 const draftStorageKey = "earthquarterSavedPlan";
-const rememberCookieName = "earthquarterRememberPlan";
+const rememberStorageKey = "earthquarterRememberPlanEnabled";
 let isSubmitting = false;
 const citiesByRegion = {
   "Andaman and Nicobar Islands": ["Port Blair", "Diglipur", "Mayabunder", "Rangat", "Hut Bay", "Car Nicobar", "Other city/town"],
@@ -87,22 +89,17 @@ function clearErrors() {
   });
 }
 
+function setEmailStatus(message, tone = "") {
+  if (!emailStatus) {
+    return;
+  }
+
+  emailStatus.textContent = message;
+  emailStatus.className = `email-status${tone ? ` is-${tone}` : ""}`;
+}
+
 function onlyDigits(value) {
   return value.replace(/\D/g, "");
-}
-
-function setCookie(name, value, days) {
-  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-  document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-}
-
-function getCookie(name) {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${encodeURIComponent(name)}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : "";
-}
-
-function deleteCookie(name) {
-  document.cookie = `${encodeURIComponent(name)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 }
 
 function getDraft() {
@@ -120,12 +117,12 @@ function getDraft() {
 
 function persistDraft(submission) {
   localStorage.setItem(draftStorageKey, JSON.stringify(submission));
-  setCookie(rememberCookieName, "1", 365);
+  localStorage.setItem(rememberStorageKey, "1");
 }
 
 function clearDraft() {
   localStorage.removeItem(draftStorageKey);
-  deleteCookie(rememberCookieName);
+  localStorage.removeItem(rememberStorageKey);
 }
 
 function fillFormFromDraft(draft) {
@@ -199,16 +196,13 @@ function toDisplayTime(hours, minutes) {
 }
 
 function parseTimeFromMessage(message) {
-  const twelveHour = message.match(/\b(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i);
+  const rangeRegex = /\b(?:from|between)\s+(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s+(?:to|until|till|-)\s+(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i;
+  const rangeMatch = message.match(rangeRegex);
 
-  if (twelveHour) {
-    let hours = Number(twelveHour[1]);
-    const minutes = twelveHour[2] ? Number(twelveHour[2]) : 0;
-    const period = twelveHour[3].toLowerCase();
-
-    if (minutes > 59) {
-      return { valid: false, error: "The time in your message looks wrong. Use a time like 7 PM, 7:00 PM, or 19:00." };
-    }
+  if (rangeMatch) {
+    let hours = Number(rangeMatch[1]);
+    const minutes = rangeMatch[2] ? Number(rangeMatch[2]) : 0;
+    const period = (rangeMatch[3] || rangeMatch[6] || "").toLowerCase();
 
     if (period.startsWith("p") && hours !== 12) {
       hours += 12;
@@ -225,19 +219,53 @@ function parseTimeFromMessage(message) {
     };
   }
 
-  const twentyFourHour = message.match(/\b([01]?\d|2[0-3])[:.](\d{2})\b/);
+  const timeCandidates = [];
+  const twelveHourRegex = /\b(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/gi;
+  const twentyFourHourRegex = /\b([01]?\d|2[0-3])[:.](\d{2})\b/g;
+  let match;
 
-  if (twentyFourHour) {
-    const hours = Number(twentyFourHour[1]);
-    const minutes = Number(twentyFourHour[2]);
+  while ((match = twelveHourRegex.exec(message)) !== null) {
+    timeCandidates.push({
+      index: match.index,
+      hours: Number(match[1]),
+      minutes: match[2] ? Number(match[2]) : 0,
+      period: match[3].toLowerCase()
+    });
+  }
 
-    if (minutes <= 59) {
-      return {
-        valid: true,
-        value: toTimeValue(hours, minutes),
-        display: toDisplayTime(hours, minutes)
-      };
+  while ((match = twentyFourHourRegex.exec(message)) !== null) {
+    timeCandidates.push({
+      index: match.index,
+      hours: Number(match[1]),
+      minutes: Number(match[2]),
+      period: null
+    });
+  }
+
+  if (timeCandidates.length) {
+    const chosen = timeCandidates.sort((a, b) => a.index - b.index)[0];
+    let hours = chosen.hours;
+    const minutes = chosen.minutes;
+
+    if (minutes > 59) {
+      return { valid: false, error: "The time in your message looks wrong. Use a time like 7 PM, 7:00 PM, or 19:00." };
     }
+
+    if (chosen.period) {
+      if (chosen.period.startsWith("p") && hours !== 12) {
+        hours += 12;
+      }
+
+      if (chosen.period.startsWith("a") && hours === 12) {
+        hours = 0;
+      }
+    }
+
+    return {
+      valid: true,
+      value: toTimeValue(hours, minutes),
+      display: toDisplayTime(hours, minutes)
+    };
   }
 
   const invalidTimeLikeText = /\b\d{1,2}(?:[:.]\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(message) || /\b\d{1,2}[:.]\d{2}\b/.test(message);
@@ -247,6 +275,37 @@ function parseTimeFromMessage(message) {
   }
 
   return { valid: false, error: "Please include a valid start time in your message, like 7:00 PM or 19:00." };
+}
+
+function parseDayFromMessage(message) {
+  const dayMap = [
+    { pattern: /\b(sunday|sundays)\b/gi, value: 0, label: "Sunday" },
+    { pattern: /\b(monday|mondays)\b/gi, value: 1, label: "Monday" },
+    { pattern: /\b(tuesday|tuesdays)\b/gi, value: 2, label: "Tuesday" },
+    { pattern: /\b(wednesday|wednesdays)\b/gi, value: 3, label: "Wednesday" },
+    { pattern: /\b(thursday|thursdays)\b/gi, value: 4, label: "Thursday" },
+    { pattern: /\b(friday|fridays)\b/gi, value: 5, label: "Friday" },
+    { pattern: /\b(saturday|saturdays)\b/gi, value: 6, label: "Saturday" }
+  ];
+
+  const matches = [];
+
+  for (const day of dayMap) {
+    let match;
+    while ((match = day.pattern.exec(message)) !== null) {
+      matches.push({
+        index: match.index,
+        value: day.value,
+        label: day.label
+      });
+    }
+  }
+
+  if (!matches.length) {
+    return null;
+  }
+
+  return matches.sort((a, b) => a.index - b.index).at(-1);
 }
 
 function validateForm() {
@@ -329,10 +388,38 @@ function getMessageTime() {
   return parseTimeFromMessage(switchMessage.value.trim());
 }
 
+function getMessageDay() {
+  return parseDayFromMessage(switchMessage.value.trim());
+}
+
 function nextCalendarStart(time) {
   const [hours, minutes] = time.split(":").map(Number);
   const start = new Date();
   start.setHours(hours, minutes, 0, 0);
+
+  if (start <= new Date()) {
+    start.setDate(start.getDate() + 1);
+  }
+
+  return start;
+}
+
+function nextCalendarStartForDay(time, weekday) {
+  const [hours, minutes] = time.split(":").map(Number);
+  const start = new Date();
+  start.setHours(hours, minutes, 0, 0);
+
+  if (typeof weekday === "number" && Number.isFinite(weekday)) {
+    const currentDay = start.getDay();
+    let delta = (weekday - currentDay + 7) % 7;
+
+    if (delta === 0 && start <= new Date()) {
+      delta = 7;
+    }
+
+    start.setDate(start.getDate() + delta);
+    return start;
+  }
 
   if (start <= new Date()) {
     start.setDate(start.getDate() + 1);
@@ -359,6 +446,7 @@ function buildSubmission() {
   const option = selectedCountry();
   const phoneDigits = onlyDigits(phoneNumber.value);
   const messageTime = getMessageTime();
+  const messageDay = getMessageDay();
 
   return {
     name: fullName.value.trim(),
@@ -377,6 +465,8 @@ function buildSubmission() {
     dateOfBirth: dateOfBirth.value,
     time: messageTime.value,
     displayTime: messageTime.display,
+    dayOfWeek: messageDay ? messageDay.value : null,
+    dayLabel: messageDay ? messageDay.label : null,
     message: switchMessage.value.trim(),
     submittedAt: new Date().toISOString()
   };
@@ -388,71 +478,39 @@ function saveSubmission(submission) {
   localStorage.setItem("earthquarterJoinSubmissions", JSON.stringify(saved));
 }
 
-function buildFormSubmitUrl(recipient) {
-  return `https://formsubmit.co/${encodeURIComponent(recipient)}`;
-}
-
-async function sendAdminSubmission(submission) {
-  let iframe = document.getElementById("earthquarterFormSubmitFrame");
-
-  if (!iframe) {
-    iframe = document.createElement("iframe");
-    iframe.id = "earthquarterFormSubmitFrame";
-    iframe.name = "earthquarterFormSubmitFrame";
-    iframe.hidden = true;
-    document.body.appendChild(iframe);
+async function sendWelcomeEmail(submission) {
+  if (!app || !app.hasEmailJsConfig()) {
+    throw new Error("EmailJS is not configured yet. Add your public key, service ID, and template ID in earthquarter-app.js.");
   }
 
-  const adminForm = document.createElement("form");
-  adminForm.method = "POST";
-  adminForm.action = buildFormSubmitUrl(formSubmitRecipient);
-  adminForm.target = "earthquarterFormSubmitFrame";
-  adminForm.hidden = true;
-
-  const addField = (name, value) => {
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = name;
-    input.value = value;
-    adminForm.appendChild(input);
-  };
-
-  addField("Name", submission.name);
-  addField("Phone", submission.phone);
-  addField("Email", submission.email);
-  addField("Country", submission.country);
-  addField("Address type", submission.addressType);
-  addField("Address", submission.address);
-  addField("Date of birth", submission.dateOfBirth);
-  addField("Earthquarter time", submission.displayTime);
-  addField("Message", submission.message);
-  addField("Submitted at", submission.submittedAt);
-  addField("_subject", `New Earthquarter submission from ${submission.name}`);
-  addField("_captcha", "false");
-  addField("_template", "table");
-
-  document.body.appendChild(adminForm);
-  adminForm.submit();
-  window.setTimeout(() => adminForm.remove(), 1000);
+  return app.sendJoinEmail(submission);
 }
 
 function updateCalendarLink(submission) {
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
-  const startDate = nextCalendarStart(submission.time);
-  const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
-  const start = formatCalendarDate(startDate);
-  const end = formatCalendarDate(endDate);
-  const title = "Task: Earthquarter 15-minute switch-off";
-  const details = [
-    `Add this as a Task in your Google Calendar app for ${submission.displayTime}.`,
-    "",
-    "Switch off all safe, non-essential electricity for 15 minutes.",
-    "",
-    `Plan message: ${submission.message}`
-  ].join("\n");
+  const calendarUrl = app
+    ? app.buildRecurringCalendarLink(submission)
+    : "";
 
-  calendarLink.href = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start}/${end}&details=${encodeURIComponent(details)}&ctz=${encodeURIComponent(timezone)}`;
-  successSummary.textContent = `${submission.name}, your plan is saved on this device. Click the button below to add a 15-minute Earthquarter task-style reminder to Google Calendar for ${submission.displayTime}.`;
+  calendarLink.href = calendarUrl;
+  successSummary.textContent = `${submission.name}, your plan is saved on this device. Your recurring weekly reminder is ready for ${submission.displayTime}.`;
+}
+
+function saveEarthquarterUser(submission) {
+  if (!app) {
+    return;
+  }
+
+  const existing = app.loadUser() || {};
+  app.saveUser({
+    ...existing,
+    name: submission.name,
+    email: submission.email,
+    nextSession: submission.displayTime,
+    displayTime: submission.displayTime,
+    time: submission.time,
+    message: submission.message,
+    joinedAt: existing.joinedAt || new Date().toISOString()
+  });
 }
 
 function captureDraftFromForm() {
@@ -543,11 +601,16 @@ form.addEventListener("submit", async (event) => {
   const submission = buildSubmission();
   submitButton.disabled = true;
   saveSubmission(submission);
+  saveEarthquarterUser(submission);
+  updateCalendarLink(submission);
+  setEmailStatus("Sending your Earthquarter welcome email...", "pending");
 
   try {
-    await sendAdminSubmission(submission);
+    await sendWelcomeEmail(submission);
+    setEmailStatus("Welcome email sent. Opening your dashboard...", "success");
   } catch (error) {
     console.error(error);
+    setEmailStatus(error.message || "Your plan was saved, but the welcome email could not be sent yet.", "error");
   }
 
   if (savePlan.checked) {
@@ -555,21 +618,15 @@ form.addEventListener("submit", async (event) => {
   } else {
     clearDraft();
   }
-  saveEarthquarterUser(submission); updateCalendarLink(submission);
   joinSuccess.hidden = false;
+  dashboardLink.href = "dashboard.html";
+  dashboardLink.textContent = "Go to dashboard";
   joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
 updatePhoneHint();
 populateCities();
 setDateLimits();
-if (getCookie(rememberCookieName) === "1") {
+if (localStorage.getItem(rememberStorageKey) === "1") {
   fillFormFromDraft(getDraft());
 }
-
-
-
-
-
-// EarthQuarter enhancements
-function saveEarthquarterUser(submission){localStorage.setItem('earthquarterUser',JSON.stringify({name:submission.name,email:submission.email,nextSession:submission.displayTime,sessionsCompleted:0,evidenceSubmitted:0,badge:'None'}));}

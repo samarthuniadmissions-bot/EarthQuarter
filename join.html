@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,8 +17,8 @@
     </a>
     <nav class="site-nav" aria-label="Join page navigation">
       <a href="index.html#action">Home</a>
-      <a href="index.html#facts">Facts</a>
-      <a href="index.html#faq">FAQ</a>
+      <a href="dashboard.html">Dashboard</a>
+      <a href="history.html">History</a>
       <a class="nav-highlight" href="#join-form">Form</a>
     </nav>
   </header>
@@ -37,7 +37,7 @@
       <div class="join-form-copy">
         <p class="eyebrow">Your pledge</p>
         <h2 id="form-title">Tell us when you will power down.</h2>
-        <p>Your information is saved on this device. After the form is valid, add your 15-minute Earthquarter plan to Google Calendar as a task-style reminder.</p>
+        <p>Your information is saved on this device. After the form is valid, Earthquarter will send a welcome email and create a recurring weekly calendar reminder.</p>
       </div>
 
       <form class="join-form" id="earthquarterJoinForm" novalidate>
@@ -177,26 +177,31 @@
           <p class="field-error" id="switchMessageError"></p>
         </div>
 
+        <div class="pledge-strip">
+          <h2>EARTHQUARTER PLEDGE</h2>
+          <p>I pledge to be a responsible energy user and an active participant in the Earthquarter initiative. I will participate in the weekly 15-minute Earthquarter activity, encourage others to do the same, and upload photo evidence of my participation after each completed session.</p>
+          <label class="save-option" for="pledgeAgree">
+            <input type="checkbox" id="pledgeAgree">
+            <span>I have read and agree to the Earthquarter Pledge</span>
+          </label>
+        </div>
+
         <label class="save-option" for="savePlan">
           <input id="savePlan" name="savePlan" type="checkbox">
           <span>Save my plan on this device</span>
         </label>
         <p class="form-note">When this is on, your details come back the next time you visit this page on the same browser.</p>
 
-        
-<div class="pledge-card">
-<h2>EARTHQUARTER PLEDGE</h2>
-<p>I pledge to be a responsible energy user and an active participant in the Earthquarter initiative. I will participate in the weekly 15‑minute Earthquarter activity, encourage others to do the same, and upload photo evidence of my participation after each completed session.</p>
-<label><input type="checkbox" id="pledgeAgree"> I have read and agree to the Earthquarter Pledge</label>
-</div>
-<button class="primary-button" id="joinBtn" type="submit" disabled>Save my plan</button><script>document.addEventListener("DOMContentLoaded",()=>{const c=document.getElementById("pledgeAgree"),b=document.getElementById("joinBtn");if(c&&b){c.onchange=()=>b.disabled=!c.checked;}})</script>
+        <button class="primary-button" id="joinBtn" type="submit" disabled>Save my plan</button>
+        <p class="email-status" id="emailStatus" aria-live="polite"></p>
       </form>
 
       <div class="join-success" id="joinSuccess" hidden>
-        <h2>Saved. Add your plan to Google Calendar.</h2>
+        <h2>Saved. Your dashboard is ready.</h2>
         <p id="successSummary">Your Earthquarter details are ready.</p>
         <div class="integration-actions">
-          <a class="primary-link" id="calendarLink" href="#" target="_blank" rel="noopener">Add to Google Calendar</a>
+          <a class="primary-link" id="calendarLink" href="#" target="_blank" rel="noopener">Add weekly reminder to Google Calendar</a>
+          <a class="secondary-link" id="dashboardLink" href="dashboard.html">Open dashboard</a>
         </div>
       </div>
     </section>
@@ -208,6 +213,19 @@
     <a href="index.html">Back to website</a>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="earthquarter-app.js"></script>
   <script src="join.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const c = document.getElementById("pledgeAgree");
+      const b = document.getElementById("joinBtn");
+      if (c && b) {
+        c.addEventListener("change", () => {
+          b.disabled = !c.checked;
+        });
+      }
+    });
+  </script>
 </body>
 </html>

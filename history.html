@@ -1,1 +1,53 @@
-<!DOCTYPE html><html><body><h1>Evidence History</h1><div id='history'></div><script>const h=JSON.parse(localStorage.getItem('earthquarterEvidence')||'[]').reverse();history.innerHTML=h.map(x=>`<div><b>${x.fileName}</b><br>${x.uploadDate}<br>${x.status}</div><hr>`).join('');</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earthquarter History</title>
+  <meta name="description" content="Review past weekly Earthquarter evidence uploads and completed weeks.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="history-page">
+  <header class="site-header">
+    <a class="brand" href="dashboard.html" aria-label="Earthquarter dashboard">
+      <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
+    </a>
+    <nav class="site-nav" aria-label="History navigation">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="evidence.html">Evidence</a>
+      <a href="join.html">Join</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="panel-hero">
+      <div class="panel-copy">
+        <p class="eyebrow">Evidence history</p>
+        <h1>Your weekly Earthquarter record.</h1>
+        <p>Look back at every week you completed and the photo proof you submitted.</p>
+      </div>
+      <div class="panel-status">
+        <p class="card-label">Records</p>
+        <h2 id="historyCount">0</h2>
+        <p>Completed weeks saved</p>
+      </div>
+    </section>
+
+    <section class="form-card">
+      <div id="historyList" class="history-list"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Earthquarter Initiative</p>
+    <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
+    <a href="dashboard.html">Back to dashboard</a>
+  </footer>
+
+  <script src="earthquarter-app.js"></script>
+  <script src="history.js"></script>
+</body>
+</html>
