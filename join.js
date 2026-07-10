@@ -1,634 +1,318 @@
-const form = document.getElementById("earthquarterJoinForm");
-const countryCode = document.getElementById("countryCode");
-const dialCode = document.getElementById("dialCode");
-const phoneNumber = document.getElementById("phoneNumber");
-const fullName = document.getElementById("fullName");
-const emailAddress = document.getElementById("emailAddress");
-const addressType = document.getElementById("addressType");
-const addressLine = document.getElementById("addressLine");
-const city = document.getElementById("city");
-const region = document.getElementById("region");
-const postalCode = document.getElementById("postalCode");
-const dateOfBirth = document.getElementById("dateOfBirth");
-const switchMessage = document.getElementById("switchMessage");
-const savePlan = document.getElementById("savePlan");
-const joinSuccess = document.getElementById("joinSuccess");
-const successSummary = document.getElementById("successSummary");
-const calendarLink = document.getElementById("calendarLink");
-const dashboardLink = document.getElementById("dashboardLink");
-const emailStatus = document.getElementById("emailStatus");
-const submitButton = form.querySelector('button[type="submit"]');
-const app = window.EarthquarterApp;
-const draftStorageKey = "earthquarterSavedPlan";
-const rememberStorageKey = "earthquarterRememberPlanEnabled";
-let isSubmitting = false;
-const citiesByRegion = {
-  "Andaman and Nicobar Islands": ["Port Blair", "Diglipur", "Mayabunder", "Rangat", "Hut Bay", "Car Nicobar", "Other city/town"],
-  "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Kurnool", "Tirupati", "Rajahmundry", "Kakinada", "Anantapur", "Other city/town"],
-  "Arunachal Pradesh": ["Itanagar", "Naharlagun", "Pasighat", "Tawang", "Ziro", "Bomdila", "Tezu", "Other city/town"],
-  "Assam": ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Tezpur", "Nagaon", "Tinsukia", "Bongaigaon", "Other city/town"],
-  "Bihar": ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Darbhanga", "Purnia", "Begusarai", "Ara", "Other city/town"],
-  "Chandigarh": ["Chandigarh", "Manimajra", "Other city/town"],
-  "Chhattisgarh": ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon", "Jagdalpur", "Ambikapur", "Other city/town"],
-  "Dadra and Nagar Haveli and Daman and Diu": ["Daman", "Diu", "Silvassa", "Amli", "Other city/town"],
-  "Delhi": ["New Delhi", "Delhi", "Dwarka", "Rohini", "Saket", "Karol Bagh", "Janakpuri", "Other city/town"],
-  "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda", "Bicholim", "Other city/town"],
-  "Gujarat": ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar", "Bhavnagar", "Jamnagar", "Junagadh", "Other city/town"],
-  "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Hisar", "Karnal", "Rohtak", "Sonipat", "Other city/town"],
-  "Himachal Pradesh": ["Shimla", "Dharamshala", "Mandi", "Solan", "Kullu", "Una", "Hamirpur", "Other city/town"],
-  "Jammu and Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Udhampur", "Kathua", "Pulwama", "Other city/town"],
-  "Jharkhand": ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh", "Giridih", "Other city/town"],
-  "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Dharwad", "Belagavi", "Kalaburagi", "Davanagere", "Ballari", "Other city/town"],
-  "Kerala": ["Thiruvananthapuram", "Kochi", "Kozhikode", "Thrissur", "Kollam", "Kannur", "Alappuzha", "Palakkad", "Other city/town"],
-  "Ladakh": ["Leh", "Kargil", "Nubra", "Zanskar", "Other city/town"],
-  "Lakshadweep": ["Kavaratti", "Agatti", "Minicoy", "Amini", "Andrott", "Other city/town"],
-  "Madhya Pradesh": ["Bhopal", "Indore", "Jabalpur", "Gwalior", "Ujjain", "Sagar", "Rewa", "Satna", "Other city/town"],
-  "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur", "Kolhapur", "Amravati", "Other city/town"],
-  "Manipur": ["Imphal", "Thoubal", "Bishnupur", "Churachandpur", "Kakching", "Ukhrul", "Other city/town"],
-  "Meghalaya": ["Shillong", "Tura", "Jowai", "Nongpoh", "Williamnagar", "Baghmara", "Other city/town"],
-  "Mizoram": ["Aizawl", "Lunglei", "Champhai", "Serchhip", "Kolasib", "Saiha", "Other city/town"],
-  "Nagaland": ["Kohima", "Dimapur", "Mokokchung", "Tuensang", "Wokha", "Mon", "Other city/town"],
-  "Odisha": ["Bhubaneswar", "Cuttack", "Rourkela", "Puri", "Berhampur", "Sambalpur", "Balasore", "Other city/town"],
-  "Puducherry": ["Puducherry", "Karaikal", "Mahe", "Yanam", "Other city/town"],
-  "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Bathinda", "Mohali", "Pathankot", "Other city/town"],
-  "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner", "Alwar", "Bhilwara", "Other city/town"],
-  "Sikkim": ["Gangtok", "Namchi", "Gyalshing", "Mangan", "Rangpo", "Other city/town"],
-  "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode", "Vellore", "Other city/town"],
-  "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam", "Mahbubnagar", "Other city/town"],
-  "Tripura": ["Agartala", "Udaipur", "Dharmanagar", "Kailashahar", "Belonia", "Khowai", "Other city/town"],
-  "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Prayagraj", "Ghaziabad", "Noida", "Meerut", "Gorakhpur", "Other city/town"],
-  "Uttarakhand": ["Dehradun", "Haridwar", "Rishikesh", "Haldwani", "Roorkee", "Nainital", "Kashipur", "Other city/town"],
-  "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Asansol", "Siliguri", "Kharagpur", "Bardhaman", "Malda", "Other city/town"],
-  "Outside India": ["Outside India", "Other city/town"]
-};
-
-function selectedCountry() {
-  return countryCode.options[countryCode.selectedIndex];
-}
-
-function setError(id, message) {
-  const error = document.getElementById(`${id}Error`);
-  const field = document.getElementById(id);
-
-  if (error) {
-    error.textContent = message;
-  }
-
-  if (field) {
-    field.classList.toggle("invalid", Boolean(message));
-  }
-
-  if (id === "phoneNumber") {
-    field.closest(".phone-row").classList.toggle("invalid", Boolean(message));
-  }
-}
-
-function clearErrors() {
-  ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "switchMessage"].forEach((id) => {
-    setError(id, "");
-  });
-}
-
-function setEmailStatus(message, tone = "") {
-  if (!emailStatus) {
-    return;
-  }
-
-  emailStatus.textContent = message;
-  emailStatus.className = `email-status${tone ? ` is-${tone}` : ""}`;
-}
-
-function onlyDigits(value) {
-  return value.replace(/\D/g, "");
-}
-
-function getDraft() {
-  const saved = localStorage.getItem(draftStorageKey);
-  if (!saved) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(saved);
-  } catch {
-    return null;
-  }
-}
-
-function persistDraft(submission) {
-  localStorage.setItem(draftStorageKey, JSON.stringify(submission));
-  localStorage.setItem(rememberStorageKey, "1");
-}
-
-function clearDraft() {
-  localStorage.removeItem(draftStorageKey);
-  localStorage.removeItem(rememberStorageKey);
-}
-
-function fillFormFromDraft(draft) {
-  if (!draft) {
-    return;
-  }
-
-  fullName.value = draft.name || "";
-  countryCode.value = draft.countryCode || countryCode.value;
-  updatePhoneHint();
-  phoneNumber.value = draft.phoneDigits || "";
-  emailAddress.value = draft.email || "";
-  addressType.value = draft.addressType || "";
-  addressLine.value = draft.addressLine || "";
-  region.value = draft.region || "";
-  populateCities();
-  city.value = draft.city || "";
-  postalCode.value = draft.postalCode || "";
-  dateOfBirth.value = draft.dateOfBirth || "";
-  switchMessage.value = draft.message || "";
-  savePlan.checked = true;
-}
-
-function updatePhoneHint() {
-  const option = selectedCountry();
-  dialCode.textContent = option.dataset.code;
-  const min = Number(option.dataset.min);
-  const max = Number(option.dataset.max);
-  phoneNumber.placeholder = min === max ? `${min} digit number` : `${min}-${max} digit number`;
-}
-
-function populateCities() {
-  const selectedRegion = region.value;
-  const cityList = citiesByRegion[selectedRegion] || [];
-
-  city.innerHTML = "";
-
-  const placeholder = document.createElement("option");
-  placeholder.value = "";
-  placeholder.textContent = selectedRegion ? "Choose city/town" : "Choose state first";
-  city.appendChild(placeholder);
-
-  cityList.forEach((cityName) => {
-    const option = document.createElement("option");
-    option.value = cityName;
-    option.textContent = cityName;
-    city.appendChild(option);
-  });
-}
-
-function isValidBirthDate(value) {
-  if (!value) {
-    return false;
-  }
-
-  const birthDate = new Date(`${value}T00:00:00`);
-  const today = new Date();
-  const earliest = new Date("1900-01-01T00:00:00");
-
-  return birthDate >= earliest && birthDate <= today;
-}
-
-function toTimeValue(hours, minutes) {
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
-}
-
-function toDisplayTime(hours, minutes) {
-  const period = hours >= 12 ? "PM" : "AM";
-  const hour12 = hours % 12 || 12;
-  return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
-}
-
-function parseTimeFromMessage(message) {
-  const rangeRegex = /\b(?:from|between)\s+(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s+(?:to|until|till|-)\s+(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i;
-  const rangeMatch = message.match(rangeRegex);
-
-  if (rangeMatch) {
-    let hours = Number(rangeMatch[1]);
-    const minutes = rangeMatch[2] ? Number(rangeMatch[2]) : 0;
-    const period = (rangeMatch[3] || rangeMatch[6] || "").toLowerCase();
-
-    if (period.startsWith("p") && hours !== 12) {
-      hours += 12;
-    }
-
-    if (period.startsWith("a") && hours === 12) {
-      hours = 0;
-    }
-
-    return {
-      valid: true,
-      value: toTimeValue(hours, minutes),
-      display: toDisplayTime(hours, minutes)
-    };
-  }
-
-  const timeCandidates = [];
-  const twelveHourRegex = /\b(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/gi;
-  const twentyFourHourRegex = /\b([01]?\d|2[0-3])[:.](\d{2})\b/g;
-  let match;
-
-  while ((match = twelveHourRegex.exec(message)) !== null) {
-    timeCandidates.push({
-      index: match.index,
-      hours: Number(match[1]),
-      minutes: match[2] ? Number(match[2]) : 0,
-      period: match[3].toLowerCase()
-    });
-  }
-
-  while ((match = twentyFourHourRegex.exec(message)) !== null) {
-    timeCandidates.push({
-      index: match.index,
-      hours: Number(match[1]),
-      minutes: Number(match[2]),
-      period: null
-    });
-  }
-
-  if (timeCandidates.length) {
-    const chosen = timeCandidates.sort((a, b) => a.index - b.index)[0];
-    let hours = chosen.hours;
-    const minutes = chosen.minutes;
-
-    if (minutes > 59) {
-      return { valid: false, error: "The time in your message looks wrong. Use a time like 7 PM, 7:00 PM, or 19:00." };
-    }
-
-    if (chosen.period) {
-      if (chosen.period.startsWith("p") && hours !== 12) {
-        hours += 12;
-      }
-
-      if (chosen.period.startsWith("a") && hours === 12) {
-        hours = 0;
-      }
-    }
-
-    return {
-      valid: true,
-      value: toTimeValue(hours, minutes),
-      display: toDisplayTime(hours, minutes)
-    };
-  }
-
-  const invalidTimeLikeText = /\b\d{1,2}(?:[:.]\d{2})?\s*(?:a\.?m\.?|p\.?m\.?)\b/i.test(message) || /\b\d{1,2}[:.]\d{2}\b/.test(message);
-
-  if (invalidTimeLikeText) {
-    return { valid: false, error: "The time in your message looks wrong. Use a time like 7 PM, 7:00 PM, or 19:00." };
-  }
-
-  return { valid: false, error: "Please include a valid start time in your message, like 7:00 PM or 19:00." };
-}
-
-function parseDayFromMessage(message) {
-  const dayMap = [
-    { pattern: /\b(sunday|sundays)\b/gi, value: 0, label: "Sunday" },
-    { pattern: /\b(monday|mondays)\b/gi, value: 1, label: "Monday" },
-    { pattern: /\b(tuesday|tuesdays)\b/gi, value: 2, label: "Tuesday" },
-    { pattern: /\b(wednesday|wednesdays)\b/gi, value: 3, label: "Wednesday" },
-    { pattern: /\b(thursday|thursdays)\b/gi, value: 4, label: "Thursday" },
-    { pattern: /\b(friday|fridays)\b/gi, value: 5, label: "Friday" },
-    { pattern: /\b(saturday|saturdays)\b/gi, value: 6, label: "Saturday" }
-  ];
-
-  const matches = [];
-
-  for (const day of dayMap) {
-    let match;
-    while ((match = day.pattern.exec(message)) !== null) {
-      matches.push({
-        index: match.index,
-        value: day.value,
-        label: day.label
-      });
-    }
-  }
-
-  if (!matches.length) {
-    return null;
-  }
-
-  return matches.sort((a, b) => a.index - b.index).at(-1);
-}
-
-function validateForm() {
-  clearErrors();
-  let valid = true;
-  const name = fullName.value.trim();
-  const phoneDigits = onlyDigits(phoneNumber.value);
-  const email = emailAddress.value.trim();
-  const addressLineValue = addressLine.value.trim();
-  const cityValue = city.value;
-  const postalCodeValue = postalCode.value.trim();
-  const message = switchMessage.value.trim();
-  const option = selectedCountry();
-  const minPhone = Number(option.dataset.min);
-  const maxPhone = Number(option.dataset.max);
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if (name.length < 2) {
-    setError("fullName", "Please enter your full name.");
-    valid = false;
-  }
-
-  if (phoneDigits.length < minPhone || phoneDigits.length > maxPhone) {
-    const lengthText = minPhone === maxPhone ? `${minPhone} digits` : `${minPhone}-${maxPhone} digits`;
-    setError("phoneNumber", `Please enter a valid phone number for this country (${lengthText}).`);
-    valid = false;
-  }
-
-  if (!emailPattern.test(email)) {
-    setError("emailAddress", "Please enter a valid email address.");
-    valid = false;
-  }
-
-  if (!addressType.value) {
-    setError("addressType", "Please choose an address type.");
-    valid = false;
-  }
-
-  if (addressLineValue.length < 8 || !/[a-zA-Z]/.test(addressLineValue) || !/\d/.test(addressLineValue)) {
-    setError("addressLine", "Please enter a street address with words and at least one number.");
-    valid = false;
-  }
-
-  if (!cityValue) {
-    setError("city", "Please choose your city or town.");
-    valid = false;
-  }
-
-  if (!region.value) {
-    setError("region", "Please choose your state or region.");
-    valid = false;
-  }
-
-  if (!/^[a-zA-Z0-9\s-]{3,10}$/.test(postalCodeValue)) {
-    setError("postalCode", "Please enter a valid PIN or postal code.");
-    valid = false;
-  }
-
-  if (!isValidBirthDate(dateOfBirth.value)) {
-    setError("dateOfBirth", "Please enter a valid date of birth. It cannot be in the future.");
-    valid = false;
-  }
-
-  if (message.length < 15) {
-    setError("switchMessage", "Please write when and how you will do the 15-minute switch-off, including a start time.");
-    valid = false;
-  } else {
-    const parsedTime = parseTimeFromMessage(message);
-
-    if (!parsedTime.valid) {
-      setError("switchMessage", parsedTime.error);
-      valid = false;
-    }
-  }
-
-  return valid;
-}
-
-function getMessageTime() {
-  return parseTimeFromMessage(switchMessage.value.trim());
-}
-
-function getMessageDay() {
-  return parseDayFromMessage(switchMessage.value.trim());
-}
-
-function nextCalendarStart(time) {
-  const [hours, minutes] = time.split(":").map(Number);
-  const start = new Date();
-  start.setHours(hours, minutes, 0, 0);
-
-  if (start <= new Date()) {
-    start.setDate(start.getDate() + 1);
-  }
-
-  return start;
-}
-
-function nextCalendarStartForDay(time, weekday) {
-  const [hours, minutes] = time.split(":").map(Number);
-  const start = new Date();
-  start.setHours(hours, minutes, 0, 0);
-
-  if (typeof weekday === "number" && Number.isFinite(weekday)) {
-    const currentDay = start.getDay();
-    let delta = (weekday - currentDay + 7) % 7;
-
-    if (delta === 0 && start <= new Date()) {
-      delta = 7;
-    }
-
-    start.setDate(start.getDate() + delta);
-    return start;
-  }
-
-  if (start <= new Date()) {
-    start.setDate(start.getDate() + 1);
-  }
-
-  return start;
-}
-
-function formatCalendarDate(date) {
-  const pad = (number) => String(number).padStart(2, "0");
-
-  return [
-    date.getFullYear(),
-    pad(date.getMonth() + 1),
-    pad(date.getDate()),
-    "T",
-    pad(date.getHours()),
-    pad(date.getMinutes()),
-    pad(date.getSeconds())
-  ].join("");
-}
-
-function buildSubmission() {
-  const option = selectedCountry();
-  const phoneDigits = onlyDigits(phoneNumber.value);
-  const messageTime = getMessageTime();
-  const messageDay = getMessageDay();
-
-  return {
-    name: fullName.value.trim(),
-    countryCode: countryCode.value,
-    country: option.textContent,
-    dialCode: option.dataset.code,
-    phone: `${option.dataset.code} ${phoneDigits}`,
-    phoneDigits,
-    email: emailAddress.value.trim(),
-    addressType: addressType.value,
-    addressLine: addressLine.value.trim(),
-    city: city.value,
-    region: region.value,
-    postalCode: postalCode.value.trim(),
-    address: `${addressLine.value.trim()}, ${city.value}, ${region.value}, ${postalCode.value.trim()}`,
-    dateOfBirth: dateOfBirth.value,
-    time: messageTime.value,
-    displayTime: messageTime.display,
-    dayOfWeek: messageDay ? messageDay.value : null,
-    dayLabel: messageDay ? messageDay.label : null,
-    message: switchMessage.value.trim(),
-    submittedAt: new Date().toISOString()
-  };
-}
-
-function saveSubmission(submission) {
-  const saved = JSON.parse(localStorage.getItem("earthquarterJoinSubmissions") || "[]");
-  saved.push(submission);
-  localStorage.setItem("earthquarterJoinSubmissions", JSON.stringify(saved));
-}
-
-async function sendWelcomeEmail(submission) {
-  if (!app || !app.hasEmailJsConfig()) {
-    throw new Error("EmailJS is not configured yet. Add your public key, service ID, and template ID in earthquarter-app.js.");
-  }
-
-  return app.sendJoinEmail(submission);
-}
-
-function updateCalendarLink(submission) {
-  const calendarUrl = app
-    ? app.buildRecurringCalendarLink(submission)
-    : "";
-
-  calendarLink.href = calendarUrl;
-  successSummary.textContent = `${submission.name}, your plan is saved on this device. Your recurring weekly reminder is ready for ${submission.displayTime}.`;
-}
-
-function saveEarthquarterUser(submission) {
-  if (!app) {
-    return;
-  }
-
-  const existing = app.loadUser() || {};
-  app.saveUser({
-    ...existing,
-    name: submission.name,
-    email: submission.email,
-    nextSession: submission.displayTime,
-    displayTime: submission.displayTime,
-    time: submission.time,
-    dayOfWeek: submission.dayOfWeek,
-    dayLabel: submission.dayLabel,
-    message: submission.message,
-    joinedAt: existing.joinedAt || new Date().toISOString()
-  });
-}
-
-function captureDraftFromForm() {
-  return {
-    name: fullName.value.trim(),
-    countryCode: countryCode.value,
-    phoneDigits: onlyDigits(phoneNumber.value),
-    email: emailAddress.value.trim(),
-    addressType: addressType.value,
-    addressLine: addressLine.value.trim(),
-    city: city.value,
-    region: region.value,
-    postalCode: postalCode.value.trim(),
-    dateOfBirth: dateOfBirth.value,
-    message: switchMessage.value.trim()
-  };
-}
-
-function setDateLimits() {
-  const today = new Date();
-  const pad = (number) => String(number).padStart(2, "0");
-  dateOfBirth.max = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
-  dateOfBirth.min = "1900-01-01";
-}
-
-countryCode.addEventListener("change", updatePhoneHint);
-region.addEventListener("change", populateCities);
-savePlan.addEventListener("change", () => {
-  if (savePlan.checked) {
-    persistDraft(captureDraftFromForm());
-    return;
-  }
-
-  clearDraft();
-});
-
-[
-  fullName,
-  countryCode,
-  phoneNumber,
-  emailAddress,
-  addressType,
-  addressLine,
-  region,
-  city,
-  postalCode,
-  dateOfBirth,
-  switchMessage
-].forEach((field) => {
-  field.addEventListener("input", () => {
-    if (savePlan.checked) {
-      persistDraft(captureDraftFromForm());
-    }
-  });
-  field.addEventListener("change", () => {
-    if (savePlan.checked) {
-      persistDraft(captureDraftFromForm());
-    }
-  });
-});
-
-phoneNumber.addEventListener("input", () => {
-  phoneNumber.value = phoneNumber.value.replace(/[^\d\s-]/g, "");
-});
-
-calendarLink.addEventListener("click", (event) => {
-  event.preventDefault();
-
-  if (!calendarLink.href || calendarLink.href.endsWith("#")) {
-    return;
-  }
-
-  window.location.href = calendarLink.href;
-});
-
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  if (isSubmitting) {
-    return;
-  }
-
-  if (!validateForm()) {
-    return;
-  }
-
-  isSubmitting = true;
-  const submission = buildSubmission();
-  submitButton.disabled = true;
-  saveSubmission(submission);
-  saveEarthquarterUser(submission);
-  updateCalendarLink(submission);
-  setEmailStatus("Sending your Earthquarter welcome email...", "pending");
-
-  try {
-    await sendWelcomeEmail(submission);
-    setEmailStatus("Welcome email sent. Opening your dashboard...", "success");
-  } catch (error) {
-    console.error(error);
-    setEmailStatus(error.message || "Your plan was saved, but the welcome email could not be sent yet.", "error");
-  }
-
-  if (savePlan.checked) {
-    persistDraft(captureDraftFromForm());
-  } else {
-    clearDraft();
-  }
-  joinSuccess.hidden = false;
-  dashboardLink.href = "dashboard.html";
-  dashboardLink.textContent = "Go to dashboard";
-  joinSuccess.scrollIntoView({ behavior: "smooth", block: "center" });
-});
-
-updatePhoneHint();
-populateCities();
-setDateLimits();
-if (localStorage.getItem(rememberStorageKey) === "1") {
-  fillFormFromDraft(getDraft());
-}
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earthquarter | 15 Minutes for Smarter Energy</title>
+  <meta name="description" content="Earthquarter is a student-led initiative helping families and schools switch off all electricity for 15 minutes each week, except urgent medical or life-saving needs.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="top" aria-hidden="true" style="position: relative; top: 0;"></div>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Earthquarter home">
+      <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
+    </a>
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="#action">Action</a>
+      <a href="#facts">Facts</a>
+      <a href="#impact">Impact</a>
+      <a href="#faq">FAQ</a>
+      <a class="nav-highlight" href="join.html">Join</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="action" aria-labelledby="hero-title">
+      <div class="hero-bg-circles" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="eyebrow">A student-led initiative</p>
+        <h1 id="hero-title">Power Down.<br><em>Wake Up.</em></h1>
+        <p class="hero-sub">15 minutes. Every week. Real change.</p>
+        <p class="hero-copy">Earthquarter is a movement to make energy awareness part of everyday life - starting with students, spreading to families and communities.</p>
+      </div>
+    </section>
+
+    <section class="countdown-action" aria-labelledby="timer-title">
+      <div class="timer-intro">
+        <p class="eyebrow">The weekly action</p>
+        <h2 id="timer-title">Start your 15-minute switch-off.</h2>
+      </div>
+      <div class="timer-panel" aria-label="Earthquarter 15-minute timer">
+        <div class="timer-display" id="timerDisplay" aria-live="polite">15:00</div>
+        <div class="timer-actions">
+          <button class="primary-button" id="startTimer" type="button">Start 15 Minutes</button>
+          <button class="ghost-button" id="resetTimer" type="button">Reset</button>
+        </div>
+        <p class="timer-note" id="timerNote">Before starting, switch off all lights and electrical devices for 15 minutes, except urgent medical or life-saving needs.</p>
+        <div class="mini-circuit" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <strong>15 min awareness pulse</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="intro-section" aria-labelledby="why-title">
+      <div class="section-copy">
+        <p class="eyebrow">The idea</p>
+        <h2 id="why-title">Most energy waste is quiet.</h2>
+        <p>Earthquarter began with a simple observation: electricity is often wasted through small unnoticed habits, not through bad intentions. A light left on. A fan running in an empty room. A charger plugged in long after it is needed.</p>
+      </div>
+    </section>
+
+    <section class="image-band" aria-labelledby="practice-title">
+      <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80" alt="A classroom with students and computers">
+      <div class="image-band-copy">
+        <p class="eyebrow">Everyday practice</p>
+        <h2 id="practice-title">Small actions become shared habits.</h2>
+        <p>Families, schools, and students can make energy awareness visible by choosing one regular moment every week to pause, check, and switch off all electricity and electrical devices for 15 minutes, except urgent medical or life-saving needs.</p>
+      </div>
+    </section>
+
+    <section class="impact-section" id="impact" aria-labelledby="impact-title">
+      <div class="section-heading">
+        <p class="eyebrow">Why it matters</p>
+        <h2 id="impact-title">Saving electricity also saves hidden resources.</h2>
+      </div>
+      <div class="impact-grid">
+        <article class="impact-card">
+          <img src="https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=900&q=80" alt="Wind turbines on green land">
+          <div>
+            <h3>Lower energy demand</h3>
+            <p>Switching off all electrical devices for 15 minutes reduces demand, builds awareness, and helps people see how much daily life depends on electricity.</p>
+          </div>
+        </article>
+        <article class="impact-card">
+          <img src="https://images.unsplash.com/photo-1470770903676-69b98201ea1c?auto=format&fit=crop&w=900&q=80" alt="Clear water flowing through a natural landscape">
+          <div>
+            <h3>Water conservation</h3>
+            <p>Using less electricity can reduce pressure on water used in parts of energy production and cooling.</p>
+          </div>
+        </article>
+        <article class="impact-card">
+          <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=900&q=80" alt="Sunlight shining through a forest">
+          <div>
+            <h3>Reduced emissions</h3>
+            <p>Lower consumption means fewer avoidable emissions when electricity comes from carbon-heavy sources.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="checklist-section" aria-labelledby="checklist-title">
+      <div class="section-copy">
+        <p class="eyebrow">Before the quarter</p>
+        <h2 id="checklist-title">A quick room-by-room check.</h2>
+        <p>Use this list before starting the 15-minute action. Switch off all electricity and electrical devices, except anything urgent, life-saving, medical, safety-related, or required by an adult or teacher.</p>
+      </div>
+      <div class="checklist" aria-label="Switch-off checklist">
+        <label><input type="checkbox"> All lights are off</label>
+        <label><input type="checkbox"> All fans are off</label>
+        <label><input type="checkbox"> Chargers are unplugged</label>
+        <label><input type="checkbox"> Screens and devices are fully off</label>
+        <label><input type="checkbox"> Non-essential plugs are switched off</label>
+      </div>
+    </section>
+
+    <section class="school-section" id="school" aria-labelledby="school-title">
+      <div class="school-copy">
+        <p class="eyebrow">For schools</p>
+        <h2 id="school-title">Let students lead the change.</h2>
+        <p>Earthquarter gives student groups a clear weekly action they can organize, measure, and talk about. The habit is simple enough for every classroom, but meaningful enough to start bigger conversations about electricity, water, and climate responsibility.</p>
+      </div>
+      <div class="steps" aria-label="School action steps">
+        <article>
+          <span>01</span>
+          <h3>Choose a weekly time</h3>
+          <p>Pick a regular 15-minute period that works for classrooms and homes.</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h3>Announce the check</h3>
+          <p>Remind everyone to switch off all electricity for 15 minutes ( while keeping life saving, and adult-required electricity in concern)</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h3>Share the habit</h3>
+          <p>Invite students to bring the same awareness into their families.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="calculator-section" id="facts" aria-labelledby="calculator-title">
+      <div class="section-heading">
+        <p class="eyebrow">15-minute facts</p>
+        <h2 id="calculator-title">See what switching off lights can save.</h2>
+        <p>Electricity saved depends on the wattage of the lights and how many are switched off. Earthquarter uses the standard calculation: watts multiplied by time, divided by 1000.</p>
+      </div>
+      <div class="lights-layout">
+        <div class="light-calculator">
+          <form class="calculator" id="lightsForm">
+            <label>
+              Place
+              <select id="placeInput">
+                <option value="home">Home</option>
+                <option value="office">Office</option>
+                <option value="school">School</option>
+                <option value="shop">Shop</option>
+                <option value="classroom">Classroom</option>
+                <option value="building">Building</option>
+              </select>
+            </label>
+            <label>
+              Lights switched off
+              <input id="lightsInput" type="number" min="1" max="500" value="10">
+            </label>
+            <label>
+              Watts per light
+              <input id="lightWattsInput" type="number" min="1" max="500" value="9">
+            </label>
+            <label>
+              Earthquarters completed per week
+              <input id="sessionsInput" type="number" min="1" max="21" value="1">
+            </label>
+            <button class="primary-button" type="submit">Update facts</button>
+          </form>
+          <p class="formula-note">Formula: lights x watts x 0.25 hours / 1000 = kWh saved per 15-minute switch-off.</p>
+          <p class="result" id="savingsResult" aria-live="polite">10 LED lights using 9 watts each save about 0.023 kWh every Earthquarter.</p>
+          <div class="source-note">
+            Electricity estimate inspired by the <a href="https://www.ostrom.de/en/stromrechner" rel="noopener">Ostrom electricity calculator</a>. Energy-efficiency context is linked to the <a href="https://www.worldenergy.org/news-views/entry/world-energy-council-launches-energy-efficiency-report-at-cop22" rel="noopener">World Energy Council</a>.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="fact-grid" aria-label="Quick Earthquarter facts">
+        <article class="fact-card">
+          <span id="sessionKwh">0.023 kWh</span>
+          <h3>for one 15-minute switch-off</h3>
+          <p>This is the amount saved by 10 LED bulbs using 9 watts each.</p>
+        </article>
+        <article class="fact-card">
+          <span id="yearlyKwh">1.17 kWh</span>
+          <h3>if you do it once a week</h3>
+          <p>Repetition turns a small action into a consistent yearly habit.</p>
+        </article>
+        <article class="fact-card">
+          <span id="communityKwh">117 kWh</span>
+          <h3>if 100 people do the same</h3>
+          <p>Earthquarter works because the action is shared, not because one person does everything.</p>
+        </article>
+      </div>
+
+      <div class="waste-year-panel" aria-live="polite">
+        <div>
+          <p class="eyebrow">One year avoided waste</p>
+          <h3>Every extra Earthquarter cuts more avoidable waste.</h3>
+          <p id="wasteYearText">In one year, this weekly habit prevents about 1.17 kWh from being wasted by one participant, or 117 kWh across 100 participants.</p>
+        </div>
+        <div class="waste-meter" aria-hidden="true">
+          <span id="wasteMeterFill"></span>
+          <strong id="wasteMeterLabel">1.17 kWh</strong>
+        </div>
+      </div>
+
+      <div class="quick-facts">
+        <p><strong>1 LED light at 9 W:</strong> 15 minutes off saves 0.002 kWh.</p>
+        <p><strong>1 old 60 W bulb:</strong> 15 minutes off saves 0.015 kWh.</p>
+        <p><strong>Efficiency matters:</strong> the <a href="https://www.worldenergy.org/news-views/entry/world-energy-council-launches-energy-efficiency-report-at-cop22" rel="noopener">World Energy Council</a> highlights energy efficiency as a direct path toward energy sustainability.</p>
+      </div>
+    </section>
+
+    <section class="faq-section" id="faq" aria-labelledby="faq-title">
+      <div class="section-heading">
+        <p class="eyebrow">FAQ</p>
+        <h2 id="faq-title">Questions people ask before they join.</h2>
+      </div>
+      <div class="faq-list">
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            What should we switch off during Earthquarter?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Switch off all electricity and all electrical devices for 15 minutes: lights, fans, screens, chargers, and appliances. Keep on only urgent, medical, life-saving, safety-required, or adult-required electricity.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Are there any exceptions?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>No. Anything urgent, life-saving, medical, safety-related, or required by an adult or teacher must stay on. Everything else using electricity should be switched off for the 15-minute Earthquarter.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Why is the action 15 minutes long?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Fifteen minutes is short enough for a school or family to try every week, but long enough to notice what usually stays on without anyone thinking about it.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Does switching off one light really matter?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>One modern LED saves a small amount in 15 minutes. The bigger purpose is habit-building: many lights, many students, and many weeks make the saving easier to see.</p>
+          </div>
+        </article>
+        <article class="faq-item">
+          <button class="faq-question" type="button" aria-expanded="false">
+            Can schools run Earthquarter without special equipment?
+            <span>+</span>
+          </button>
+          <div class="faq-answer">
+            <p>Yes. A weekly announcement, a classroom checklist, and a student volunteer team are enough to start. The website timer can be projected or opened on a phone.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="join-section" id="join" aria-labelledby="join-title">
+      <img src="https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1500&q=80" alt="Students gathered around a table working on a shared project">
+      <div class="join-copy">
+        <p class="eyebrow">Join Earthquarter</p>
+        <h2 id="join-title">Start with one quarter of an hour.</h2>
+        <p>Choose your weekly Earthquarter time, invite your class or family, and keep the 15-minute all-electricity switch-off habit alive until energy awareness feels natural.</p>
+        <a class="primary-link" href="join.html">Join the initiative</a>
+      </div>
+    </section>
+
+    <section class="founder-section" id="founder" aria-labelledby="founder-title">
+      <div class="founder-photo-panel">
+        <img src="assets/founder.png" alt="Founder of Earthquarter smiling in formal wear">
+      </div>
+      <div class="founder-story">
+        <p class="eyebrow">Our Founder</p>
+        <h2 id="founder-title">Samarth Nathani</h2>
+        <p class="founder-question">How was this idea created?</p>
+        <p>Earthquarter began with one student's simple observation: electricity is often wasted not because people do not care, but because daily routines move too fast for anyone to notice what has been left on.</p>
+        <p>At home and at school, the same pattern kept appearing - lights in empty rooms, fans running after everyone had left, and chargers still plugged in long after they were needed. That small but repeated waste inspired a bigger question: what if one short habit each week could help people pause, notice, and act together?</p>
+        <p>That question became Earthquarter. The idea was to create a 15-minute weekly switch-off that feels easy to begin, meaningful to repeat, and powerful enough to spread from students to families, classrooms, and communities.</p>
+        <div class="founder-note">
+          <strong>Vision:</strong>
+          <p>Build a culture where young people lead practical climate action through awareness, consistency, and shared responsibility.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Earthquarter Initiative</p>
+    <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
+    <a href="#top">Back to top</a>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

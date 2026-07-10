@@ -1,489 +1,130 @@
-(function (window) {
-  const STORAGE_KEYS = {
-    user: "earthquarterUser",
-    evidence: "earthquarterEvidence",
-    draft: "earthquarterSavedPlan",
-    remember: "earthquarterRememberPlan"
-  };
-
-  const EMAILJS_CONFIG = {
-    publicKey: "oWzdB-OXZ5v0zw0_F",
-    joinServiceId: "gmail_earthquarter",
-    joinTemplateId: "template_b1qj1hj",
-    evidenceServiceId: "gmail_earthquarter",
-    // Duplicate or adjust this template in EmailJS so the file attachment field is named `image`.
-    evidenceTemplateId: "template_b1qj1hj",
-    adminEmail: "earthquarter24@gmail.com"
-  };
-
-  function readJson(key, fallback) {
-    try {
-      const raw = window.localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }
-
-  function writeJson(key, value) {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  }
-
-  function pad(number) {
-    return String(number).padStart(2, "0");
-  }
-
-  function getIsoWeekInfo(date = new Date()) {
-    const utc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNumber = utc.getUTCDay() || 7;
-    utc.setUTCDate(utc.getUTCDate() + 4 - dayNumber);
-    const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
-    const weekNumber = Math.ceil((((utc - yearStart) / 86400000) + 1) / 7);
-
-    return {
-      year: utc.getUTCFullYear(),
-      week: weekNumber,
-      key: `${utc.getUTCFullYear()}-W${pad(weekNumber)}`,
-      label: `Week ${weekNumber}`,
-      dateLabel: new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric"
-      }).format(date)
-    };
-  }
-
-  function getBadgeName(weeks) {
-    if (weeks >= 30) {
-      return "Gold Earthkeeper";
-    }
-
-    if (weeks >= 15) {
-      return "Silver Earthkeeper";
-    }
-
-    if (weeks >= 5) {
-      return "Bronze Earthkeeper";
-    }
-
-    return "Starter";
-  }
-
-  function getCurrentWeekKey(date = new Date()) {
-    return getIsoWeekInfo(date).key;
-  }
-
-  function getCurrentWeekLabel(date = new Date()) {
-    const info = getIsoWeekInfo(date);
-    return `${info.label} (${info.dateLabel})`;
-  }
-
-  function loadUser() {
-    return readJson(STORAGE_KEYS.user, null);
-  }
-
-  function saveUser(user) {
-    const nextUser = {
-      sessionsCompleted: 0,
-      evidenceSubmitted: 0,
-      badge: "Starter",
-      joinedAt: new Date().toISOString(),
-      ...user
-    };
-
-    nextUser.badge = nextUser.badge || getBadgeName(Number(nextUser.sessionsCompleted) || 0);
-    writeJson(STORAGE_KEYS.user, nextUser);
-    return nextUser;
-  }
-
-  function clearUser() {
-    window.localStorage.removeItem(STORAGE_KEYS.user);
-  }
-
-  function loadEvidenceRecords() {
-    const records = readJson(STORAGE_KEYS.evidence, []);
-    return Array.isArray(records) ? records : [];
-  }
-
-  function getRecordedEvidenceHashes() {
-    return loadEvidenceRecords()
-      .map((record) => record && record.imageHash)
-      .filter(Boolean);
-  }
-
-  async function hashFile(file) {
-    const buffer = await file.arrayBuffer();
-    const digest = await window.crypto.subtle.digest("SHA-256", buffer);
-    return Array.from(new Uint8Array(digest))
-      .map((byte) => byte.toString(16).padStart(2, "0"))
-      .join("");
-  }
-
-  function getImageDimensions(file) {
-    return new Promise((resolve, reject) => {
-      const image = new Image();
-      const url = URL.createObjectURL(file);
-
-      image.onload = () => {
-        URL.revokeObjectURL(url);
-        resolve({ width: image.naturalWidth || 0, height: image.naturalHeight || 0 });
-      };
-
-      image.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error("We could not read that image. Please use a normal photo file."));
-      };
-
-      image.src = url;
-    });
-  }
-
-  async function validateEvidenceFile(file) {
-    if (!file || !file.type || !file.type.startsWith("image/")) {
-      throw new Error("Please upload a real image file.");
-    }
-
-    const dimensions = await getImageDimensions(file);
-    const hash = await hashFile(file);
-    if (getRecordedEvidenceHashes().includes(hash)) {
-      throw new Error("This photo was already used before. Please upload a different Earthquarter photo.");
-    }
-
-    return { hash, dimensions };
-  }
-
-  function saveEvidenceRecords(records) {
-    writeJson(STORAGE_KEYS.evidence, records);
-    return records;
-  }
-
-  function parseTimeParts(timeValue) {
-    const [rawHours, rawMinutes] = String(timeValue || "19:00").split(":").map(Number);
-    return {
-      hours: Number.isFinite(rawHours) ? rawHours : 19,
-      minutes: Number.isFinite(rawMinutes) ? rawMinutes : 0
-    };
-  }
-
-  function buildDateAtTime(baseDate, timeValue) {
-    const { hours, minutes } = parseTimeParts(timeValue);
-    const date = new Date(baseDate);
-    date.setHours(hours, minutes, 0, 0);
-    return date;
-  }
-
-  function getEvidenceUploadWindow(user, now = new Date()) {
-    const sessionMinutes = 15;
-    const uploadHours = 24;
-    const hasWeekday = typeof user.dayOfWeek === "number" && Number.isFinite(user.dayOfWeek);
-    let sessionStart = buildDateAtTime(now, user.time || "19:00");
-
-    if (hasWeekday) {
-      const currentDay = now.getDay();
-      const offset = user.dayOfWeek - currentDay;
-      sessionStart.setDate(sessionStart.getDate() + offset);
-    }
-
-    const sessionEnd = new Date(sessionStart.getTime() + sessionMinutes * 60 * 1000);
-    const uploadDeadline = new Date(sessionEnd.getTime() + uploadHours * 60 * 60 * 1000);
-
-    let status = "open";
-    if (now < sessionEnd) {
-      status = "too_early";
-    } else if (now > uploadDeadline) {
-      status = "expired";
-    }
-
-    return {
-      status,
-      canUpload: status === "open",
-      sessionStart,
-      sessionEnd,
-      uploadDeadline
-    };
-  }
-
-  function formatDateTime(date) {
-    return new Intl.DateTimeFormat("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "2-digit"
-    }).format(date);
-  }
-
-  function getEvidenceForWeek(weekKey = getCurrentWeekKey()) {
-    return loadEvidenceRecords().find((record) => record.weekKey === weekKey) || null;
-  }
-
-  function upsertEvidenceRecord(record) {
-    const records = loadEvidenceRecords();
-    const index = records.findIndex((item) => item.weekKey === record.weekKey);
-
-    if (index >= 0) {
-      records[index] = { ...records[index], ...record };
-    } else {
-      records.unshift(record);
-    }
-
-    saveEvidenceRecords(records);
-    return records;
-  }
-
-  function updateUserForEvidence(record) {
-    const user = loadUser() || {};
-    const existing = getEvidenceForWeek(record.weekKey);
-
-    if (!existing) {
-      user.sessionsCompleted = (Number(user.sessionsCompleted) || 0) + 1;
-      user.evidenceSubmitted = (Number(user.evidenceSubmitted) || 0) + 1;
-    }
-
-    user.badge = getBadgeName(Number(user.sessionsCompleted) || 0);
-    user.lastCompletedWeek = record.weekKey;
-    user.lastEvidenceAt = record.submittedAt;
-    user.lastEvidenceFileName = record.fileName;
-    saveUser(user);
-    return user;
-  }
-
-  function getLatestEvidence() {
-    const records = loadEvidenceRecords();
-    return records.length ? records[0] : null;
-  }
-
-  function getLatestWeekSummary() {
-    const record = getLatestEvidence();
-    if (!record) {
-      return null;
-    }
-
-    return {
-      weekKey: record.weekKey,
-      weekLabel: record.weekLabel,
-      status: record.status,
-      submittedAt: record.submittedAt,
-      fileName: record.fileName
-    };
-  }
-
-  function nextCalendarStart(timeValue) {
-    const [hours, minutes] = String(timeValue || "19:00").split(":").map(Number);
-    const start = new Date();
-    start.setHours(hours, minutes, 0, 0);
-
-    if (start <= new Date()) {
-      start.setDate(start.getDate() + 1);
-    }
-
-    return start;
-  }
-
-  function nextCalendarStartForDay(timeValue, weekday) {
-    const [hours, minutes] = String(timeValue || "19:00").split(":").map(Number);
-    const start = new Date();
-    start.setHours(hours, minutes, 0, 0);
-
-    if (typeof weekday === "number" && Number.isFinite(weekday)) {
-      const currentDay = start.getDay();
-      let delta = (weekday - currentDay + 7) % 7;
-
-      if (delta === 0 && start <= new Date()) {
-        delta = 7;
-      }
-
-      start.setDate(start.getDate() + delta);
-      return start;
-    }
-
-    if (start <= new Date()) {
-      start.setDate(start.getDate() + 1);
-    }
-
-    return start;
-  }
-
-  function formatCalendarDate(date) {
-    return [
-      date.getFullYear(),
-      pad(date.getMonth() + 1),
-      pad(date.getDate()),
-      "T",
-      pad(date.getHours()),
-      pad(date.getMinutes()),
-      pad(date.getSeconds())
-    ].join("");
-  }
-
-  function buildRecurringCalendarLink(submission) {
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
-    const startDate = nextCalendarStartForDay(submission.time, submission.dayOfWeek);
-    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
-    const start = formatCalendarDate(startDate);
-    const end = formatCalendarDate(endDate);
-    const title = "Earthquarter weekly switch-off";
-    const details = [
-      `Weekly Earthquarter reminder for ${submission.name}.`,
-      "",
-      "Switch off all safe, non-essential electricity for 15 minutes.",
-      "",
-      `Plan message: ${submission.message}`
-    ].join("\n");
-
-    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start}/${end}&details=${encodeURIComponent(details)}&recur=${encodeURIComponent("RRULE:FREQ=WEEKLY;INTERVAL=1")}&ctz=${encodeURIComponent(timezone)}`;
-  }
-
-  function hasEmailJsConfig() {
-    return Boolean(
-      window.emailjs &&
-      EMAILJS_CONFIG.publicKey &&
-      !EMAILJS_CONFIG.publicKey.startsWith("YOUR_") &&
-      EMAILJS_CONFIG.joinServiceId &&
-      !EMAILJS_CONFIG.joinServiceId.startsWith("YOUR_") &&
-      EMAILJS_CONFIG.joinTemplateId &&
-      !EMAILJS_CONFIG.joinTemplateId.startsWith("YOUR_")
-    );
-  }
-
-  function hasEvidenceEmailJsConfig() {
-    return Boolean(
-      hasEmailJsConfig() &&
-      EMAILJS_CONFIG.evidenceTemplateId &&
-      !EMAILJS_CONFIG.evidenceTemplateId.startsWith("YOUR_")
-    );
-  }
-
-  function initEmailJs() {
-    if (!hasEmailJsConfig()) {
-      return false;
-    }
-
-    window.emailjs.init({
-      publicKey: EMAILJS_CONFIG.publicKey,
-      limitRate: {
-        id: "earthquarter",
-        throttle: 1000
-      }
-    });
-
-    return true;
-  }
-
-  function sendJoinEmail(params) {
-    if (!initEmailJs()) {
-      return Promise.reject(new Error("EmailJS is not configured yet."));
-    }
-
-    return window.emailjs.send(EMAILJS_CONFIG.joinServiceId, EMAILJS_CONFIG.joinTemplateId, {
-      to_email: params.email,
-      name: params.name,
-      message: params.message,
-      email: params.email,
-      phone: params.phone,
-      address: params.address,
-      display_time: params.displayTime,
-      reply_to: EMAILJS_CONFIG.adminEmail
-    });
-  }
-
-  function setFormValue(form, name, value) {
-    let input = form.querySelector(`[name="${name}"]`);
-    if (!input) {
-      input = document.createElement("input");
-      input.type = "hidden";
-      input.name = name;
-      form.appendChild(input);
-    }
-    input.value = value;
-  }
-
-  function sendEvidenceForm(form, toEmail) {
-    if (!hasEvidenceEmailJsConfig()) {
-      return Promise.reject(new Error("Evidence email is not configured yet. Check the EmailJS evidence template in earthquarter-app.js."));
-    }
-
-    if (!initEmailJs()) {
-      return Promise.reject(new Error("EmailJS is not configured yet."));
-    }
-
-    setFormValue(form, "to_email", toEmail || EMAILJS_CONFIG.adminEmail);
-
-    return window.emailjs.sendForm(
-      EMAILJS_CONFIG.evidenceServiceId,
-      EMAILJS_CONFIG.evidenceTemplateId,
-      form
-    );
-  }
-
-  async function verifyEvidenceUpload(payload) {
-    const response = await fetch("/api/verify-evidence", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const message = await response.text().catch(() => "");
-      throw new Error(message || "We could not verify this photo right now.");
-    }
-
-    return response.json();
-  }
-
-  function saveJoinDraft(value) {
-    writeJson(STORAGE_KEYS.draft, value);
-    window.document.cookie = `${encodeURIComponent(STORAGE_KEYS.remember)}=1; path=/`;
-  }
-
-  function loadJoinDraft() {
-    return readJson(STORAGE_KEYS.draft, null);
-  }
-
-  function clearJoinDraft() {
-    window.localStorage.removeItem(STORAGE_KEYS.draft);
-    window.document.cookie = `${encodeURIComponent(STORAGE_KEYS.remember)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-  }
-
-  function rememberJoinDraftEnabled() {
-    return /(?:^|; )earthquarterRememberPlan=1(?:;|$)/.test(window.document.cookie);
-  }
-
-  window.EarthquarterApp = {
-    storageKeys: STORAGE_KEYS,
-    emailJsConfig: EMAILJS_CONFIG,
-    getIsoWeekInfo,
-    getCurrentWeekKey,
-    getCurrentWeekLabel,
-    getBadgeName,
-    loadUser,
-    saveUser,
-    clearUser,
-    loadEvidenceRecords,
-    saveEvidenceRecords,
-    getRecordedEvidenceHashes,
-    hashFile,
-    getImageDimensions,
-    validateEvidenceFile,
-    getEvidenceUploadWindow,
-    formatDateTime,
-    getEvidenceForWeek,
-    upsertEvidenceRecord,
-    updateUserForEvidence,
-    getLatestEvidence,
-    getLatestWeekSummary,
-    buildRecurringCalendarLink,
-    hasEmailJsConfig,
-    hasEvidenceEmailJsConfig,
-    initEmailJs,
-    sendJoinEmail,
-    sendEvidenceForm,
-    verifyEvidenceUpload,
-    saveJoinDraft,
-    loadJoinDraft,
-    clearJoinDraft,
-    rememberJoinDraftEnabled
-  };
-})(window);
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earthquarter Dashboard</title>
+  <meta name="description" content="See your Earthquarter streak, weekly evidence status, and recurring reminder from the dashboard.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dashboard-page">
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="Earthquarter home">
+      <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
+    </a>
+    <nav class="site-nav" aria-label="Dashboard navigation">
+      <a href="index.html#action">Home</a>
+      <a href="join.html">Join</a>
+      <a href="evidence.html">Evidence</a>
+      <a href="history.html">History</a>
+    </nav>
+  </header>
+
+  <main class="dashboard-shell">
+    <section class="dashboard-hero">
+      <div class="dashboard-copy">
+        <p class="eyebrow">Your Earthquarter dashboard</p>
+        <h1>Hi, <span id="userName">Earthkeeper</span></h1>
+        <p id="dashboardLead">Your weekly Earthquarter reminder, evidence, and progress all live here.</p>
+        <div class="dashboard-actions">
+          <a class="primary-link" id="calendarLink" href="#" target="_blank" rel="noopener">Open weekly calendar reminder</a>
+          <a class="primary-link dashboard-jump-link" href="#dashboardEvidenceForm">Upload photo</a>
+          <a class="secondary-link" id="changeDetailsLink" href="join.html">Change details</a>
+        </div>
+      </div>
+      <div class="dashboard-art">
+        <img src="arturo_anez-bulb-7746884.jpg" alt="Light bulb with leaves symbolizing Earthquarter">
+      </div>
+    </section>
+
+    <section class="dashboard-grid">
+      <article class="dash-card dash-profile">
+        <p class="card-label">Profile</p>
+        <h2 id="userBadge">Starter</h2>
+        <p id="userEmail">Not set</p>
+        <div class="mini-stats">
+          <div>
+            <strong id="sessionsCompleted">0</strong>
+            <span>Weeks done</span>
+          </div>
+          <div>
+            <strong id="evidenceSubmitted">0</strong>
+            <span>Evidence uploads</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="dash-card dash-status">
+        <p class="card-label">This week</p>
+        <h2 id="weekLabel">Week 0</h2>
+        <p id="weekStatus">Checking your current Earthquarter status...</p>
+        <div class="status-chip" id="statusChip">Pending</div>
+      </article>
+
+      <article class="dash-card dash-evidence">
+        <p class="card-label">Evidence</p>
+        <h2>Photo proof</h2>
+        <div class="evidence-preview" id="evidencePreview">
+          <span>No photo uploaded yet.</span>
+        </div>
+        <p id="evidenceSummary">Upload a photo to mark this week as complete.</p>
+      </article>
+
+      <article class="dash-card dash-history">
+        <p class="card-label">History</p>
+        <h2>Recent weeks</h2>
+        <div id="historyPreview" class="history-preview"></div>
+        <a class="secondary-link" href="history.html">View full history</a>
+      </article>
+
+      <article class="dash-card dash-upload">
+        <p class="card-label">Weekly upload</p>
+        <h2>Submit your evidence photo</h2>
+        <p id="uploadCopy">Upload a photo after your 15-minute all-electricity switch-off and send it to Earthquarter.</p>
+        <form id="dashboardEvidenceForm" class="dashboard-evidence-form">
+          <div class="form-field">
+            <label for="dashboardEvidencePhoto">Evidence photo</label>
+            <input id="dashboardEvidencePhoto" name="image" type="file" accept="image/*" required>
+            <p class="field-error" id="dashboardPhotoError"></p>
+          </div>
+
+          <label class="check-note">
+            <input id="dashboardEvidenceConfirm" type="checkbox" required>
+            This photo shows my chosen Earthquarter evidence after switching off all electricity and electrical devices, except medical or life-saving needs.
+          </label>
+
+          <input type="hidden" name="name" id="dashboardEvidenceName">
+          <input type="hidden" name="email" id="dashboardEvidenceEmail">
+          <input type="hidden" name="week" id="dashboardEvidenceWeek">
+          <input type="hidden" name="week_label" id="dashboardEvidenceWeekLabel">
+          <input type="hidden" name="status" id="dashboardEvidenceStatus" value="Submitted">
+          <input type="hidden" name="to_email" id="dashboardEvidenceToEmail">
+          <input type="hidden" name="image_hash" id="dashboardEvidenceHash">
+          <input type="hidden" name="verification_status" id="dashboardEvidenceVerificationStatus" value="Pending">
+          <input type="hidden" name="message" id="dashboardEvidenceMessage">
+
+          <div class="evidence-preview-area" id="dashboardEvidencePreview">
+            <span>Preview will appear here.</span>
+          </div>
+
+          <button class="primary-button" type="submit" id="dashboardSubmitEvidence">Send evidence</button>
+          <p class="email-status" id="dashboardEvidenceSendStatus" aria-live="polite"></p>
+        </form>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>© 2026 Earthquarter Initiative</p>
+    <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
+    <a href="index.html">Back to website</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script src="earthquarter-app.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

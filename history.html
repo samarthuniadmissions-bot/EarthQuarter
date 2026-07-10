@@ -1,23 +1,23 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Earthquarter History</title>
-  <meta name="description" content="Review past weekly Earthquarter evidence uploads and completed weeks.">
+  <title>Earthquarter Evidence Check-In</title>
+  <meta name="description" content="Upload your weekly Earthquarter evidence photo and keep your streak moving.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="history-page">
+<body class="evidence-page">
   <header class="site-header">
     <a class="brand" href="dashboard.html" aria-label="Earthquarter dashboard">
       <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
     </a>
-    <nav class="site-nav" aria-label="History navigation">
+    <nav class="site-nav" aria-label="Evidence navigation">
       <a href="dashboard.html">Dashboard</a>
-      <a href="evidence.html">Evidence</a>
+      <a href="history.html">History</a>
       <a href="join.html">Join</a>
     </nav>
   </header>
@@ -25,19 +25,51 @@
   <main class="page-shell">
     <section class="panel-hero">
       <div class="panel-copy">
-        <p class="eyebrow">Evidence history</p>
-        <h1>Your weekly Earthquarter record.</h1>
-        <p>Look back at every week you completed and the photo proof you submitted.</p>
+        <p class="eyebrow">Weekly evidence</p>
+        <h1>Upload your Earthquarter proof.</h1>
+        <p id="evidenceLead">Take one photo showing your Earthquarter moment and send it to Earthquarter for the current week.</p>
+        <div class="dashboard-actions">
+          <a class="primary-link" href="dashboard.html">Back to dashboard</a>
+          <a class="secondary-link" href="history.html">View history</a>
+        </div>
       </div>
       <div class="panel-status">
-        <p class="card-label">Records</p>
-        <h2 id="historyCount">0</h2>
-        <p>Completed weeks saved</p>
+        <p class="card-label">Current week</p>
+        <h2 id="evidenceWeekLabel">Week 0</h2>
+        <p id="evidenceStatus">Checking status...</p>
       </div>
     </section>
 
-    <section class="form-card">
-      <div id="historyList" class="history-list"></div>
+    <section class="form-card evidence-card">
+      <form id="evidenceForm" class="evidence-form">
+        <div class="form-field">
+          <label for="evidencePhoto">Evidence photo</label>
+          <input id="evidencePhoto" name="image" type="file" accept="image/*" required>
+          <p class="field-error" id="photoError"></p>
+        </div>
+
+        <label class="check-note">
+          <input id="evidenceConfirm" type="checkbox" required>
+          This photo shows my chosen Earthquarter evidence after switching off all electricity and electrical devices, except medical or life-saving needs.
+        </label>
+
+        <input type="hidden" name="name" id="evidenceName">
+        <input type="hidden" name="email" id="evidenceEmail">
+        <input type="hidden" name="week" id="evidenceWeek">
+        <input type="hidden" name="week_label" id="evidenceWeekText">
+        <input type="hidden" name="status" id="evidenceFormStatus" value="Submitted">
+        <input type="hidden" name="to_email" id="evidenceToEmail">
+        <input type="hidden" name="image_hash" id="evidenceImageHash">
+        <input type="hidden" name="verification_status" id="evidenceVerificationStatus" value="Pending">
+        <input type="hidden" name="message" id="evidenceMessage">
+
+        <div class="evidence-preview-area" id="evidencePreviewArea">
+          <span>Preview will appear here.</span>
+        </div>
+
+        <button class="primary-button" type="submit" id="submitEvidence">Submit evidence</button>
+        <p class="email-status" id="evidenceSendStatus" aria-live="polite"></p>
+      </form>
     </section>
   </main>
 
@@ -47,7 +79,8 @@
     <a href="dashboard.html">Back to dashboard</a>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="earthquarter-app.js"></script>
-  <script src="history.js"></script>
+  <script src="evidence.js"></script>
 </body>
 </html>
