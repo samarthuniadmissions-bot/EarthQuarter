@@ -1,232 +1,148 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Join Earthquarter | Plan Your 15 Minutes</title>
-  <meta name="description" content="Join Earthquarter, share your details, plan your weekly 15-minute switch-off time, and add it to Google Calendar.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body class="join-page">
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Earthquarter home">
-      <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
-    </a>
-    <nav class="site-nav" aria-label="Join page navigation">
-      <a href="index.html#action">Home</a>
-      <a href="dashboard.html">Dashboard</a>
-      <a href="history.html">History</a>
-      <a class="nav-highlight" href="#join-form">Form</a>
-    </nav>
-  </header>
+const timerDisplay = document.getElementById("timerDisplay");
+const startTimer = document.getElementById("startTimer");
+const resetTimer = document.getElementById("resetTimer");
+const timerNote = document.getElementById("timerNote");
+const lightsForm = document.getElementById("lightsForm");
+const placeInput = document.getElementById("placeInput");
+const lightsInput = document.getElementById("lightsInput");
+const lightWattsInput = document.getElementById("lightWattsInput");
+const sessionsInput = document.getElementById("sessionsInput");
+const savingsResult = document.getElementById("savingsResult");
+const sessionKwh = document.getElementById("sessionKwh");
+const yearlyKwh = document.getElementById("yearlyKwh");
+const communityKwh = document.getElementById("communityKwh");
+const wasteYearText = document.getElementById("wasteYearText");
+const wasteMeterFill = document.getElementById("wasteMeterFill");
+const wasteMeterLabel = document.getElementById("wasteMeterLabel");
 
-  <main>
-    <section class="join-hero" aria-labelledby="join-page-title">
-      <div class="hero-bg-circles" aria-hidden="true"></div>
-      <div class="join-hero-copy">
-        <p class="eyebrow">Join Earthquarter</p>
-        <h1 id="join-page-title">Plan your <em>15 minutes.</em></h1>
-        <p>Share your details, choose the time you will switch off all electricity and electrical devices for 15 minutes, and add the plan to your calendar.</p>
-      </div>
-    </section>
+const totalSeconds = 15 * 60;
+let secondsLeft = totalSeconds;
+let timerId = null;
 
-    <section class="join-form-section" id="join-form" aria-labelledby="form-title">
-      <div class="join-form-copy">
-        <p class="eyebrow">Your pledge</p>
-        <h2 id="form-title">Tell us when you will power down.</h2>
-        <p>Your information is saved on this device. After the form is valid, Earthquarter will send a welcome email and create a recurring weekly calendar reminder.</p>
-      </div>
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+  const remainingSeconds = (seconds % 60).toString().padStart(2, "0");
+  return `${minutes}:${remainingSeconds}`;
+}
 
-      <form class="join-form" id="earthquarterJoinForm" novalidate>
-        <div class="form-field">
-          <label for="fullName">Name</label>
-          <input id="fullName" name="fullName" type="text" autocomplete="name" placeholder="Your full name">
-          <p class="field-error" id="fullNameError"></p>
-        </div>
+function renderTimer() {
+  timerDisplay.textContent = formatTime(secondsLeft);
+}
 
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="countryCode">Country</label>
-            <select id="countryCode" name="countryCode">
-              <option value="IN" data-code="+91" data-min="10" data-max="10">India (+91)</option>
-              <option value="US" data-code="+1" data-min="10" data-max="10">United States (+1)</option>
-              <option value="CA" data-code="+1" data-min="10" data-max="10">Canada (+1)</option>
-              <option value="GB" data-code="+44" data-min="10" data-max="10">United Kingdom (+44)</option>
-              <option value="PK" data-code="+92" data-min="10" data-max="10">Pakistan (+92)</option>
-              <option value="BD" data-code="+880" data-min="10" data-max="10">Bangladesh (+880)</option>
-              <option value="NP" data-code="+977" data-min="10" data-max="10">Nepal (+977)</option>
-              <option value="LK" data-code="+94" data-min="9" data-max="9">Sri Lanka (+94)</option>
-              <option value="AE" data-code="+971" data-min="9" data-max="9">United Arab Emirates (+971)</option>
-              <option value="AU" data-code="+61" data-min="9" data-max="9">Australia (+61)</option>
-              <option value="DE" data-code="+49" data-min="10" data-max="11">Germany (+49)</option>
-              <option value="FR" data-code="+33" data-min="9" data-max="9">France (+33)</option>
-              <option value="SG" data-code="+65" data-min="8" data-max="8">Singapore (+65)</option>
-              <option value="ZA" data-code="+27" data-min="9" data-max="9">South Africa (+27)</option>
-              <option value="JP" data-code="+81" data-min="10" data-max="10">Japan (+81)</option>
-              <option value="OTHER" data-code="+" data-min="7" data-max="15">Other country</option>
-            </select>
-          </div>
+function stopTimer() {
+  window.clearInterval(timerId);
+  timerId = null;
+  startTimer.textContent = "Start 15 Minutes";
+}
 
-          <div class="form-field">
-            <label for="phoneNumber">Phone number</label>
-            <div class="phone-row">
-              <span id="dialCode">+91</span>
-              <input id="phoneNumber" name="phoneNumber" type="tel" inputmode="tel" autocomplete="tel" placeholder="10 digit number">
-            </div>
-            <p class="field-error" id="phoneNumberError"></p>
-          </div>
-        </div>
+function startCountdown() {
+  if (timerId) {
+    stopTimer();
+    timerNote.textContent = "Paused. Keep all electricity switched off if it is safe to continue, except medical or life-saving needs.";
+    return;
+  }
 
-        <div class="form-field">
-          <label for="emailAddress">Email</label>
-          <input id="emailAddress" name="emailAddress" type="email" autocomplete="email" placeholder="you@example.com">
-          <p class="field-error" id="emailAddressError"></p>
-        </div>
+  if (secondsLeft <= 0) {
+    secondsLeft = totalSeconds;
+    renderTimer();
+  }
 
-        <div class="form-field">
-          <label for="addressType">Address type</label>
-          <select id="addressType" name="addressType">
-            <option value="">Choose one</option>
-            <option value="Home">Home</option>
-            <option value="School">School</option>
-            <option value="Office">Office</option>
-            <option value="Other">Other</option>
-          </select>
-          <p class="field-error" id="addressTypeError"></p>
-        </div>
+  startTimer.textContent = "Pause";
+  timerNote.textContent = "Earthquarter is running. Use the quiet to notice what electricity usually stays on unnoticed.";
 
-        <div class="form-field">
-          <label for="addressLine">Address line</label>
+  timerId = window.setInterval(() => {
+    secondsLeft -= 1;
+    renderTimer();
 
-          <input id="addressLine" name="addressLine" type="text" autocomplete="street-address" placeholder="House/building number and street">
-          <p class="field-error" id="addressLineError"></p>
-        </div>
+    if (secondsLeft <= 0) {
+      stopTimer();
+      secondsLeft = 0;
+      timerNote.textContent = "Done. Switch on only what you need, and keep the habit for next week.";
+      renderTimer();
+    }
+  }, 1000);
+}
 
-        <div class="form-grid">
-          <div class="form-field">
-            <label for="region">State or union territory</label>
-            <select id="region" name="region" autocomplete="address-level1">
-              <option value="">Choose state/union territory</option>
-              <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-              <option value="Andhra Pradesh">Andhra Pradesh</option>
-              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-              <option value="Assam">Assam</option>
-              <option value="Bihar">Bihar</option>
-              <option value="Chandigarh">Chandigarh</option>
-              <option value="Chhattisgarh">Chhattisgarh</option>
-              <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
-              <option value="Delhi">Delhi</option>
-              <option value="Goa">Goa</option>
-              <option value="Gujarat">Gujarat</option>
-              <option value="Haryana">Haryana</option>
-              <option value="Himachal Pradesh">Himachal Pradesh</option>
-              <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-              <option value="Jharkhand">Jharkhand</option>
-              <option value="Karnataka">Karnataka</option>
-              <option value="Kerala">Kerala</option>
-              <option value="Ladakh">Ladakh</option>
-              <option value="Lakshadweep">Lakshadweep</option>
-              <option value="Madhya Pradesh">Madhya Pradesh</option>
-              <option value="Maharashtra">Maharashtra</option>
-              <option value="Manipur">Manipur</option>
-              <option value="Meghalaya">Meghalaya</option>
-              <option value="Mizoram">Mizoram</option>
-              <option value="Nagaland">Nagaland</option>
-              <option value="Odisha">Odisha</option>
-              <option value="Puducherry">Puducherry</option>
-              <option value="Punjab">Punjab</option>
-              <option value="Rajasthan">Rajasthan</option>
-              <option value="Sikkim">Sikkim</option>
-              <option value="Tamil Nadu">Tamil Nadu</option>
-              <option value="Telangana">Telangana</option>
-              <option value="Tripura">Tripura</option>
-              <option value="Uttar Pradesh">Uttar Pradesh</option>
-              <option value="Uttarakhand">Uttarakhand</option>
-              <option value="West Bengal">West Bengal</option>
-              <option value="Outside India">Outside India</option>
-            </select>
-            <p class="field-error" id="regionError"></p>
-          </div>
+function resetCountdown() {
+  stopTimer();
+  secondsLeft = totalSeconds;
+  timerNote.textContent = "Before starting, switch off all lights and electrical devices for 15 minutes, except urgent medical or life-saving needs.";
+  renderTimer();
+}
 
-          <div class="form-field">
-            <label for="city">City or town</label>
-            <select id="city" name="city" autocomplete="address-level2">
-              <option value="">Choose state first</option>
-            </select>
-            <p class="field-error" id="cityError"></p>
-          </div>
-        </div>
+function formatKwh(value) {
+  if (value < 0.1) {
+    return value.toFixed(3);
+  }
 
-        <div class="form-field">
-          <label for="postalCode">PIN or postal code</label>
-          <input id="postalCode" name="postalCode" type="text" autocomplete="postal-code" placeholder="Postal code">
-          <p class="field-error" id="postalCodeError"></p>
-        </div>
+  if (value < 10) {
+    return value.toFixed(2);
+  }
 
-        <div class="form-field">
-          <label for="dateOfBirth">Date of birth</label>
-          <input id="dateOfBirth" name="dateOfBirth" type="date" autocomplete="bday">
-          <p class="field-error" id="dateOfBirthError"></p>
-        </div>
+  return value.toFixed(0);
+}
 
-        <div class="form-field">
-          <label for="switchMessage">Message</label>
-          <textarea id="switchMessage" name="switchMessage" rows="5" placeholder="Example: I will do my Earthquarter switch-off every Sunday from 7:00 PM to 7:15 PM with my family."></textarea>
-          <p class="field-error" id="switchMessageError"></p>
-        </div>
+function updateLightSavings(event) {
+  if (event) {
+    event.preventDefault();
+  }
 
-        <div class="pledge-strip">
-          <h2>EARTHQUARTER PLEDGE</h2>
-          <p>I pledge to be a responsible energy user and an active participant in the Earthquarter initiative. I will participate in the weekly 15-minute Earthquarter activity, encourage others to do the same, and upload photo evidence of my participation after each completed session.</p>
-          <label class="save-option" for="pledgeAgree">
-            <input type="checkbox" id="pledgeAgree">
-            <span>I have read and agree to the Earthquarter Pledge</span>
-          </label>
-        </div>
+  const lights = Math.max(1, Number(lightsInput.value) || 1);
+  const watts = Math.max(1, Number(lightWattsInput.value) || 1);
+  const sessions = Math.max(1, Number(sessionsInput.value) || 1);
+  const perSession = (lights * watts * 0.25) / 1000;
+  const perYear = perSession * sessions * 52;
+  const communityYear = perYear * 100;
 
-        <label class="save-option" for="savePlan">
-          <input id="savePlan" name="savePlan" type="checkbox">
-          <span>Save my plan on this device</span>
-        </label>
-        <p class="form-note">When this is on, your details come back the next time you visit this page on the same browser.</p>
+  sessionKwh.textContent = `${formatKwh(perSession)} kWh`;
+  yearlyKwh.textContent = `${formatKwh(perYear)} kWh`;
+  communityKwh.textContent = `${formatKwh(communityYear)} kWh`;
+  wasteYearText.textContent = `In one year, completing ${sessions} Earthquarter${sessions === 1 ? "" : "s"} per week prevents about ${formatKwh(perYear)} kWh from being wasted by one participant, or ${formatKwh(communityYear)} kWh across 100 participants.`;
+  wasteMeterLabel.textContent = `${formatKwh(perYear)} kWh`;
+  wasteMeterFill.style.transform = `scaleY(${Math.min(1, Math.max(0.12, perYear / 25))})`;
 
-        <button class="primary-button" id="joinBtn" type="submit" disabled>Save my plan</button>
-        <p class="email-status" id="emailStatus" aria-live="polite"></p>
-      </form>
+  savingsResult.textContent = `${lights} light${lights === 1 ? "" : "s"} using ${watts} watt${watts === 1 ? "" : "s"} each save about ${formatKwh(perSession)} kWh every Earthquarter. Completing ${sessions} Earthquarter${sessions === 1 ? "" : "s"} per week saves about ${formatKwh(perYear)} kWh in a year.`;
+}
 
-      <div class="join-success" id="joinSuccess" hidden>
-        <h2>Saved. Your dashboard is ready.</h2>
-        <p id="successSummary">Your Earthquarter details are ready.</p>
-        <div class="integration-actions">
-          <a class="primary-link" id="calendarLink" href="#" target="_blank" rel="noopener">Add weekly reminder to Google Calendar</a>
-          <a class="secondary-link" id="dashboardLink" href="dashboard.html">Open dashboard</a>
-        </div>
-      </div>
-    </section>
-  </main>
+function revealWhenVisible() {
+  const revealItems = document.querySelectorAll(".fact-card, .faq-item");
 
-  <footer class="site-footer">
-    <p>© 2026 Earthquarter Initiative</p>
-    <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
-    <a href="index.html">Back to website</a>
-  </footer>
+  if (!("IntersectionObserver" in window)) {
+    revealItems.forEach((item) => item.classList.add("is-visible"));
+    return;
+  }
 
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="earthquarter-app.js"></script>
-  <script src="join.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const c = document.getElementById("pledgeAgree");
-      const b = document.getElementById("joinBtn");
-      if (c && b) {
-        c.addEventListener("change", () => {
-          b.disabled = !c.checked;
-        });
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
       }
     });
-  </script>
-</body>
-</html>
+  }, { threshold: 0.18 });
+
+  revealItems.forEach((item) => observer.observe(item));
+}
+
+document.querySelectorAll(".checklist input").forEach((input) => {
+  input.addEventListener("change", () => {
+    input.closest("label").classList.toggle("done", input.checked);
+  });
+});
+
+startTimer.addEventListener("click", startCountdown);
+resetTimer.addEventListener("click", resetCountdown);
+lightsForm.addEventListener("submit", updateLightSavings);
+placeInput.addEventListener("change", updateLightSavings);
+
+document.querySelectorAll(".faq-question").forEach((button) => {
+  button.addEventListener("click", () => {
+    const faqItem = button.closest(".faq-item");
+    const isOpen = faqItem.classList.toggle("open");
+    button.setAttribute("aria-expanded", isOpen.toString());
+  });
+});
+
+renderTimer();
+updateLightSavings();
+revealWhenVisible();
