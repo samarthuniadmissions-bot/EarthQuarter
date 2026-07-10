@@ -144,10 +144,6 @@
     }
 
     const dimensions = await getImageDimensions(file);
-    if (dimensions.width < 640 || dimensions.height < 480) {
-      throw new Error("Please upload a clearer photo. We need at least 640 x 480 pixels.");
-    }
-
     const hash = await hashFile(file);
     if (getRecordedEvidenceHashes().includes(hash)) {
       throw new Error("This photo was already used before. Please upload a different Earthquarter photo.");
@@ -159,6 +155,62 @@
   function saveEvidenceRecords(records) {
     writeJson(STORAGE_KEYS.evidence, records);
     return records;
+  }
+
+  function parseTimeParts(timeValue) {
+    const [rawHours, rawMinutes] = String(timeValue || "19:00").split(":").map(Number);
+    return {
+      hours: Number.isFinite(rawHours) ? rawHours : 19,
+      minutes: Number.isFinite(rawMinutes) ? rawMinutes : 0
+    };
+  }
+
+  function buildDateAtTime(baseDate, timeValue) {
+    const { hours, minutes } = parseTimeParts(timeValue);
+    const date = new Date(baseDate);
+    date.setHours(hours, minutes, 0, 0);
+    return date;
+  }
+
+  function getEvidenceUploadWindow(user, now = new Date()) {
+    const sessionMinutes = 15;
+    const uploadHours = 24;
+    const hasWeekday = typeof user.dayOfWeek === "number" && Number.isFinite(user.dayOfWeek);
+    let sessionStart = buildDateAtTime(now, user.time || "19:00");
+
+    if (hasWeekday) {
+      const currentDay = now.getDay();
+      const offset = user.dayOfWeek - currentDay;
+      sessionStart.setDate(sessionStart.getDate() + offset);
+    }
+
+    const sessionEnd = new Date(sessionStart.getTime() + sessionMinutes * 60 * 1000);
+    const uploadDeadline = new Date(sessionEnd.getTime() + uploadHours * 60 * 60 * 1000);
+
+    let status = "open";
+    if (now < sessionEnd) {
+      status = "too_early";
+    } else if (now > uploadDeadline) {
+      status = "expired";
+    }
+
+    return {
+      status,
+      canUpload: status === "open",
+      sessionStart,
+      sessionEnd,
+      uploadDeadline
+    };
+  }
+
+  function formatDateTime(date) {
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    }).format(date);
   }
 
   function getEvidenceForWeek(weekKey = getCurrentWeekKey()) {
@@ -335,14 +387,27 @@
     });
   }
 
-  function sendEvidenceForm(form) {
+  function setFormValue(form, name, value) {
+    let input = form.querySelector(`[name="${name}"]`);
+    if (!input) {
+      input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      form.appendChild(input);
+    }
+    input.value = value;
+  }
+
+  function sendEvidenceForm(form, toEmail) {
     if (!hasEvidenceEmailJsConfig()) {
-      return Promise.reject(new Error("Add your evidence EmailJS template ID in earthquarter-app.js."));
+      return Promise.reject(new Error("Evidence email is not configured yet. Check the EmailJS evidence template in earthquarter-app.js."));
     }
 
     if (!initEmailJs()) {
       return Promise.reject(new Error("EmailJS is not configured yet."));
     }
+
+    setFormValue(form, "to_email", toEmail || EMAILJS_CONFIG.adminEmail);
 
     return window.emailjs.sendForm(
       EMAILJS_CONFIG.evidenceServiceId,
@@ -402,6 +467,8 @@
     hashFile,
     getImageDimensions,
     validateEvidenceFile,
+    getEvidenceUploadWindow,
+    formatDateTime,
     getEvidenceForWeek,
     upsertEvidenceRecord,
     updateUserForEvidence,

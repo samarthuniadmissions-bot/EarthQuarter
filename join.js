@@ -1,4 +1,4 @@
-﻿const form = document.getElementById("earthquarterJoinForm");
+const form = document.getElementById("earthquarterJoinForm");
 const countryCode = document.getElementById("countryCode");
 const dialCode = document.getElementById("dialCode");
 const phoneNumber = document.getElementById("phoneNumber");
@@ -508,6 +508,8 @@ function saveEarthquarterUser(submission) {
     nextSession: submission.displayTime,
     displayTime: submission.displayTime,
     time: submission.time,
+    dayOfWeek: submission.dayOfWeek,
+    dayLabel: submission.dayLabel,
     message: submission.message,
     joinedAt: existing.joinedAt || new Date().toISOString()
   });

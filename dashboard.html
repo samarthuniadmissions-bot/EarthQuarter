@@ -101,7 +101,7 @@
           <input type="hidden" name="week" id="dashboardEvidenceWeek">
           <input type="hidden" name="week_label" id="dashboardEvidenceWeekLabel">
           <input type="hidden" name="status" id="dashboardEvidenceStatus" value="Submitted">
-          <input type="hidden" name="to_email" value="earthquarter24@gmail.com">
+          <input type="hidden" name="to_email" id="dashboardEvidenceToEmail">
           <input type="hidden" name="image_hash" id="dashboardEvidenceHash">
           <input type="hidden" name="verification_status" id="dashboardEvidenceVerificationStatus" value="Pending">
           <input type="hidden" name="message" id="dashboardEvidenceMessage">
@@ -123,6 +123,7 @@
     <a href="index.html">Back to website</a>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script src="earthquarter-app.js"></script>
   <script src="dashboard.js"></script>
 </body>

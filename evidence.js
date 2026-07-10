@@ -6,6 +6,7 @@ if (!user || !user.name) {
 } else {
   const weekInfo = app.getIsoWeekInfo();
   const currentEvidence = app.getEvidenceForWeek(weekInfo.key);
+  const uploadWindow = app.getEvidenceUploadWindow(user);
 
 const evidenceForm = document.getElementById("evidenceForm");
 const evidencePhoto = document.getElementById("evidencePhoto");
@@ -38,14 +39,29 @@ if (currentEvidence) {
   evidenceSendStatus.textContent = "This week already has evidence. You can check your dashboard or history.";
   submitEvidence.disabled = true;
   evidencePhoto.disabled = true;
+  evidenceConfirm.disabled = true;
 
   if (currentEvidence.imageDataUrl) {
     evidencePreviewArea.innerHTML = `<img src="${currentEvidence.imageDataUrl}" alt="Current week evidence preview">`;
   } else {
     evidencePreviewArea.innerHTML = "<span>Evidence already submitted for this week.</span>";
   }
+} else if (!uploadWindow.canUpload) {
+  const opensText = app.formatDateTime(uploadWindow.sessionEnd);
+  const deadlineText = app.formatDateTime(uploadWindow.uploadDeadline);
+  const expired = uploadWindow.status === "expired";
+
+  evidenceStatus.textContent = expired
+    ? "The 24-hour evidence window has closed."
+    : `Evidence upload opens after ${opensText}.`;
+  evidenceSendStatus.textContent = expired
+    ? "This Earthquarter will not be counted because evidence was not uploaded within 24 hours."
+    : `Come back after ${opensText}. You can upload until ${deadlineText}.`;
+  submitEvidence.disabled = true;
+  evidencePhoto.disabled = true;
+  evidenceConfirm.disabled = true;
 } else {
-  evidenceStatus.textContent = "No evidence submitted yet.";
+  evidenceStatus.textContent = `Upload is open until ${app.formatDateTime(uploadWindow.uploadDeadline)}.`;
 }
 
 evidencePhoto.addEventListener("change", () => {
@@ -90,6 +106,14 @@ evidenceForm.addEventListener("submit", async (event) => {
     return;
   }
 
+  if (!uploadWindow.canUpload) {
+    evidenceSendStatus.textContent = uploadWindow.status === "expired"
+      ? "The 24-hour upload window has closed, so this Earthquarter cannot be counted."
+      : `You can upload after ${app.formatDateTime(uploadWindow.sessionEnd)}.`;
+    evidenceSendStatus.className = "email-status is-error";
+    return;
+  }
+
   const file = evidencePhoto.files && evidencePhoto.files[0];
 
   if (!file) {
@@ -98,57 +122,26 @@ evidenceForm.addEventListener("submit", async (event) => {
   }
 
   if (!evidenceConfirm.checked) {
-    photoError.textContent = "Please confirm that this is your real Earthquarter moment.";
-    return;
-  }
-
-  if (!app.hasEvidenceEmailJsConfig()) {
-    evidenceSendStatus.textContent = "Add your evidence EmailJS template ID in earthquarter-app.js.";
-    evidenceSendStatus.className = "email-status is-error";
-    return;
-  }
-
-  try {
-    const validation = await app.validateEvidenceFile(file);
-    evidenceImageHash.value = validation.hash;
-    const imageDataUrl = await readImageDataUrl(file);
-    try {
-      const verification = await app.verifyEvidenceUpload({
-        name: user.name || "",
-        email: user.email || "",
-        weekLabel: weekInfo.label,
-        description: "A real Earthquarter evidence photo showing a lights-off, unplugged, or quiet 15-minute energy-saving moment.",
-        imageDataUrl,
-        fileName: file.name
-      });
-
-      if (!verification || !verification.approved) {
-        throw new Error(verification && verification.reason ? verification.reason : "This photo does not look like a match for the Earthquarter evidence description.");
-      }
-
-      evidenceVerificationStatus.value = "Approved";
-    } catch (verificationError) {
-      if (String(verificationError.message || "").includes("does not look like a match")) {
-        throw verificationError;
-      }
-
-      evidenceVerificationStatus.value = "Pending review";
-      evidenceSendStatus.textContent = "Verification service is unavailable right now, so this upload will be saved for manual review.";
-      evidenceSendStatus.className = "email-status is-pending";
-    }
-  } catch (error) {
-    photoError.textContent = error.message || "Please upload a different photo.";
-    submitEvidence.disabled = false;
+    photoError.textContent = "Please confirm that this is your chosen Earthquarter evidence photo.";
     return;
   }
 
   submitEvidence.disabled = true;
-  evidenceSendStatus.textContent = "Sending your evidence photo to Earthquarter...";
+  photoError.textContent = "";
+  evidenceSendStatus.textContent = "Checking and sending your evidence photo...";
   evidenceSendStatus.className = "email-status is-pending";
   evidenceFormStatus.value = "Submitted";
 
   try {
-    await app.sendEvidenceForm(evidenceForm);
+    const validation = await app.validateEvidenceFile(file);
+    evidenceImageHash.value = validation.hash;
+    evidenceVerificationStatus.value = "Accepted by participant";
+
+    await app.sendEvidenceForm(evidenceForm, app.emailJsConfig.adminEmail);
+    if (user.email) {
+      await app.sendEvidenceForm(evidenceForm, user.email);
+    }
+
     const record = {
       weekKey: weekInfo.key,
       weekLabel: weekInfo.label,
@@ -156,15 +149,15 @@ evidenceForm.addEventListener("submit", async (event) => {
       submittedAt: new Date().toISOString(),
       fileName: file.name,
       imageHash: evidenceImageHash.value,
-      verificationStatus: evidenceVerificationStatus.value || "Approved",
-      imageDataUrl,
+      verificationStatus: evidenceVerificationStatus.value,
+      imageDataUrl: await readImageDataUrl(file),
       userName: user.name,
       userEmail: user.email
     };
 
     app.upsertEvidenceRecord(record);
     app.updateUserForEvidence(record);
-    evidenceSendStatus.textContent = "Evidence submitted successfully. Returning to dashboard...";
+    evidenceSendStatus.textContent = "Evidence sent successfully. Returning to dashboard...";
     evidenceSendStatus.className = "email-status is-success";
     window.setTimeout(() => {
       window.location.href = "dashboard.html";
