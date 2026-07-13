@@ -1,4 +1,4 @@
-﻿const form = document.getElementById("earthquarterJoinForm");
+const form = document.getElementById("earthquarterJoinForm");
 const countryCode = document.getElementById("countryCode");
 const dialCode = document.getElementById("dialCode");
 const phoneNumber = document.getElementById("phoneNumber");
@@ -13,6 +13,7 @@ const dateOfBirth = document.getElementById("dateOfBirth");
 const billCurrency = document.getElementById("billCurrency");
 const electricityBill = document.getElementById("electricityBill");
 const switchMessage = document.getElementById("switchMessage");
+const privacyAgree = document.getElementById("privacyAgree");
 const savePlan = document.getElementById("savePlan");
 const joinSuccess = document.getElementById("joinSuccess");
 const successSummary = document.getElementById("successSummary");
@@ -86,7 +87,7 @@ function setError(id, message) {
 }
 
 function clearErrors() {
-  ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "billCurrency", "electricityBill", "switchMessage"].forEach((id) => {
+  ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "billCurrency", "electricityBill", "switchMessage", "privacyAgree"].forEach((id) => {
     setError(id, "");
   });
 }
@@ -387,6 +388,11 @@ function validateForm() {
 
   if (!electricityBillValue || !Number.isFinite(electricityBillNumber) || electricityBillNumber <= 0) {
     setError("electricityBill", "Please enter the total electricity bill amount for the past three months.");
+    valid = false;
+  }
+
+  if (!privacyAgree.checked) {
+    setError("privacyAgree", "Please read and agree to the Privacy Policy before saving your plan.");
     valid = false;
   }
 
