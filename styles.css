@@ -1234,7 +1234,8 @@ h2 em {
 
 .site-footer p {
   margin: 0;
-  font-weight: 900;
+  font-size: 0.92rem;
+  font-weight: 700;
 }
 
 .site-footer a {
