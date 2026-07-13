@@ -74,12 +74,6 @@
   });
 
   closeButton?.addEventListener("click", () => {
-    if (checkbox && checkbox.checked) {
-      window.sessionStorage.setItem(acceptedKey, "1");
-      closeGate();
-      return;
-    }
-
     setMessage("Please read and agree to the Privacy Policy before closing this box.");
     copy?.focus();
   });
