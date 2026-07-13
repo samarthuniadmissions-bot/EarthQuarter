@@ -386,7 +386,7 @@ function validateForm() {
   }
 
   if (!electricityBillValue || !Number.isFinite(electricityBillNumber) || electricityBillNumber <= 0) {
-    setError("electricityBill", "Please enter the total electricity bill amount for the past three months.");
+    setError("electricityBill", "Please enter the average electricity bill amount for the past three months.");
     valid = false;
   }
 
