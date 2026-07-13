@@ -57,7 +57,7 @@ module.exports = async function handler(req, res) {
   const prompt = [
     "You are verifying Earthquarter evidence photos.",
     "Decide whether the uploaded photo matches the description and looks like a real photo of an Earthquarter moment.",
-    "Be strict about the match. Reject if the image does not clearly show the described energy-saving moment.",
+    "Be strict about the match. Reject if the image does not clearly show the described all-electricity switch-off moment.",
     "Reject if it looks synthetic, generated, heavily edited, or unrelated.",
     "If lights are not visible or the scene is ambiguous, only approve when the evidence is still clearly consistent with the description.",
     "",

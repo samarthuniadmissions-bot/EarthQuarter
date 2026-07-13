@@ -1,1991 +1,537 @@
-﻿<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Earthquarter Dashboard</title>
-  <meta name="description" content="See your Earthquarter streak, weekly evidence status, and recurring reminder from the dashboard.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Inline CSS fallback so hosted pages still render if styles.css is not loaded. -->
-  <style id="earthquarter-inline-css">
-:root {
-  --ink: #1c1c1c;
-  --muted: #56645d;
-  --paper: #f5faf0;
-  --white: #ffffff;
-  --leaf: #4a8c5c;
-  --leaf-dark: #1a3a2a;
-  --moss: #2d5a3d;
-  --aqua: #2a7a7a;
-  --sun: #f0c060;
-  --amber: #d4821a;
-  --coral: #c85f3e;
-  --mist: #c8e6d0;
-  --line: #cfe0d2;
-  --shadow: 0 18px 42px rgba(26, 58, 42, 0.15);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  margin: 0;
-  color: var(--ink);
-  background: var(--paper);
-  font-family: "DM Sans", Arial, Helvetica, sans-serif;
-  line-height: 1.6;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-a {
-  color: inherit;
-}
-
-button,
-input {
-  font: inherit;
-}
-
-.site-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  min-height: 70px;
-  padding: 0 5%;
-  color: var(--white);
-  background: #1a3a2a;
-  border-bottom: 1px solid rgba(200, 230, 208, 0.2);
-}
-
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0;
-  color: var(--sun);
-  font-family: "Space Mono", monospace;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
-  text-decoration: none;
-}
-
-.brand-earth {
-  color: var(--sun);
-}
-
-.brand-quarter {
-  color: #8fbd92;
-}
-
-.site-nav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.site-nav a {
-  min-height: 38px;
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 10px;
-  color: var(--mist);
-  border-radius: 8px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.site-nav a:hover {
-  color: var(--sun);
-  background: rgba(200, 230, 208, 0.09);
-  text-decoration: none;
-}
-
-.site-nav .nav-highlight {
-  min-height: 44px;
-  padding: 10px 16px;
-  color: var(--leaf-dark);
-  background: var(--sun);
-  font-size: 0.86rem;
-  font-weight: 900;
-}
-
-.site-nav .nav-highlight:hover {
-  color: var(--leaf-dark);
-  background: #ffd579;
-}
-
-.hero {
-  position: relative;
-  min-height: 100vh;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  overflow: hidden;
-  padding: 150px 6% 58px;
-  color: var(--white);
-  text-align: center;
-  background: #1a3a2a;
-}
-
-.hero-bg-circles {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.hero-bg-circles::before,
-.hero-bg-circles::after {
-  content: "";
-  position: absolute;
-  top: 55%;
-  left: 50%;
-  border: 1px solid rgba(143, 189, 146, 0.13);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: heroRing 6s ease-in-out infinite;
-}
-
-.hero-bg-circles::before {
-  width: min(900px, 118vw);
-  height: min(900px, 118vw);
-}
-
-.hero-bg-circles::after {
-  width: min(1120px, 145vw);
-  height: min(1120px, 145vw);
-  opacity: 0.65;
-  animation-delay: 1.5s;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-  width: min(760px, 100%);
-  margin: 0 auto;
-}
-
-.eyebrow {
-  margin: 0 0 12px;
-  color: var(--coral);
-  font-size: 0.82rem;
-  font-weight: 800;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.hero .eyebrow {
-  color: var(--sun);
-  margin-bottom: 38px;
-  font-family: "Space Mono", monospace;
-  font-size: 1rem;
-}
-
-h1,
-h2,
-h3,
-p {
-  overflow-wrap: anywhere;
-}
-
-h1,
-h2,
-h3 {
-  margin: 0;
-  line-height: 1.08;
-}
-
-h1 {
-  max-width: 760px;
-  margin: 0 auto;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 5.1rem;
-  font-weight: 900;
-  color: #f2f4ee;
-}
-
-h2 {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 2.6rem;
-  font-weight: 700;
-}
-
-h3 {
-  font-size: 1.18rem;
-}
-
-h1 em,
-h2 em {
-  color: var(--sun);
-  font-style: italic;
-}
-
-.hero-sub {
-  margin: 10px 0 48px;
-  color: #8fbd92;
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 1.75rem;
-  font-style: italic;
-  font-weight: 700;
-}
-
-.hero-copy {
-  max-width: 710px;
-  margin: 0 auto;
-  font-size: 1.55rem;
-  color: #d5ded6;
-  font-weight: 300;
-  line-height: 1.8;
-}
-
-.countdown-action {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(320px, 0.75fr);
-  gap: 32px;
-  align-items: center;
-  padding: 72px 6%;
-  color: var(--white);
-  background: var(--moss);
-}
-
-.timer-intro {
-  max-width: 520px;
-}
-
-.timer-intro .eyebrow {
-  color: var(--sun);
-}
-
-.timer-intro h2 {
-  color: var(--paper);
-}
-
-.timer-panel {
-  width: min(560px, 100%);
-  padding: 22px;
-  border: 1px solid rgba(200, 230, 208, 0.32);
-  border-radius: 8px;
-  background: rgba(26, 58, 42, 0.54);
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-}
-
-.timer-display {
-  min-height: 92px;
-  color: var(--white);
-  font-size: 4rem;
-  font-weight: 900;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.timer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.primary-button,
-.secondary-button,
-.ghost-button,
-.primary-link {
-  display: inline-flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  border: 0;
-  cursor: pointer;
-  font-weight: 800;
-  text-decoration: none;
-  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
-}
-
-.primary-button,
-.primary-link {
-  color: var(--ink);
-  background: var(--sun);
-  padding: 12px 20px;
-}
-
-.primary-button:hover,
-.primary-link:hover {
-  background: #ffd85d;
-  transform: translateY(-2px);
-}
-
-.primary-button:disabled {
-  opacity: 0.72;
-  cursor: wait;
-  transform: none;
-}
-
-.secondary-button {
-  color: var(--white);
-  background: var(--leaf);
-  padding: 12px 18px;
-}
-
-.secondary-button:hover {
-  background: var(--leaf-dark);
-  transform: translateY(-2px);
-}
-
-.ghost-button {
-  color: var(--white);
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  padding: 11px 19px;
-}
-
-.ghost-button:hover {
-  background: rgba(255, 255, 255, 0.16);
-  transform: translateY(-2px);
-}
-
-.timer-note {
-  margin: 16px 0 0;
-  color: rgba(255, 255, 255, 0.84);
-  font-size: 0.94rem;
-}
-
-.mini-circuit {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr auto;
-  gap: 8px;
-  align-items: center;
-  margin-top: 18px;
-}
-
-.mini-circuit span {
-  position: relative;
-  height: 8px;
-  overflow: hidden;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.mini-circuit span::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--sun);
-  transform: translateX(-110%);
-  animation: circuitFlow 2.2s ease-in-out infinite;
-}
-
-.mini-circuit span:nth-child(2)::after {
-  animation-delay: 0.25s;
-}
-
-.mini-circuit span:nth-child(3)::after {
-  animation-delay: 0.5s;
-}
-
-.mini-circuit strong {
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-
-.intro-section,
-.founder-section,
-.impact-section,
-.checklist-section,
-.school-section,
-.calculator-section,
-.faq-section,
-.join-section {
-  padding: 86px 6%;
-}
-
-.intro-section {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
-  gap: 38px;
-  align-items: center;
-  background: var(--white);
-}
-
-.section-copy,
-.section-heading,
-.school-copy {
-  max-width: 690px;
-}
-
-.section-copy p,
-.school-copy p,
-.section-heading p {
-  color: var(--muted);
-  font-size: 1.05rem;
-}
-
-.pledge-strip {
-  display: grid;
-  gap: 14px;
-  padding: 24px;
-  color: var(--leaf-dark);
-  background: #f7fbf4;
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 14px 30px rgba(26, 58, 42, 0.08);
-}
-
-.pledge-strip h2 {
-  color: var(--leaf-dark);
-  font-size: clamp(2rem, 3.8vw, 3.4rem);
-  line-height: 0.98;
-}
-
-.pledge-strip span {
-  color: var(--leaf-dark);
-  font-size: 1rem;
-  font-weight: 900;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-
-.pledge-strip p {
-  margin: 0;
-  color: #304236;
-  font-size: 1.02rem;
-  line-height: 1.75;
-}
-
-.pledge-strip .save-option {
-  margin-top: 6px;
-  background: #eef6f0;
-}
-
-.image-band {
-  position: relative;
-  min-height: 540px;
-  display: grid;
-  align-items: end;
-  overflow: hidden;
-  color: var(--white);
-}
-
-.image-band img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.image-band::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(0deg, rgba(15, 35, 27, 0.83), rgba(15, 35, 27, 0.15));
-}
-
-.image-band-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 720px;
-  padding: 0 6% 72px;
-}
-
-.image-band-copy p {
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 1.08rem;
-}
-
-.founder-section {
-  display: grid;
-  grid-template-columns: minmax(280px, 0.92fr) minmax(0, 1.08fr);
-  gap: 40px;
-  align-items: center;
-  background:
-    radial-gradient(circle at top right, rgba(240, 192, 96, 0.18), transparent 30%),
-    linear-gradient(135deg, #f7fbf5, #eef6f0);
-}
-
-.founder-photo-panel {
-  position: relative;
-  padding: 14px;
-  background: linear-gradient(135deg, rgba(45, 90, 61, 0.12), rgba(240, 192, 96, 0.28));
-  border-radius: 18px;
-  box-shadow: 0 20px 44px rgba(26, 58, 42, 0.14);
-}
-
-.founder-photo-panel::after {
-  content: "";
-  position: absolute;
-  inset: auto 18px -18px 18px;
-  height: 28px;
-  background: rgba(26, 58, 42, 0.08);
-  filter: blur(18px);
-  border-radius: 999px;
-}
-
-.founder-photo-panel img {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  max-height: 620px;
-  object-fit: cover;
-  border-radius: 12px;
-}
-
-.founder-story {
-  max-width: 700px;
-}
-
-.founder-question {
-  margin: 12px 0 18px;
-  color: var(--leaf-dark);
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 1.35rem;
-  font-style: italic;
-  font-weight: 700;
-}
-
-.founder-story p {
-  color: var(--muted);
-  font-size: 1.05rem;
-}
-
-.founder-note {
-  display: grid;
-  gap: 8px;
-  margin-top: 26px;
-  padding: 20px 22px;
-  background: rgba(255, 255, 255, 0.84);
-  border-left: 5px solid var(--amber);
-  border-radius: 8px;
-  box-shadow: 0 12px 28px rgba(26, 58, 42, 0.08);
-}
-
-.founder-note strong {
-  color: var(--leaf-dark);
-  font-family: "Space Mono", monospace;
-  font-size: 0.95rem;
-  text-transform: uppercase;
-}
-
-.founder-note p {
-  margin: 0;
-  color: var(--leaf-dark);
-  font-weight: 700;
-}
-
-.impact-section {
-  background: var(--paper);
-}
-
-.section-heading {
-  margin-bottom: 34px;
-}
-
-.impact-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-}
-
-.impact-card {
-  overflow: hidden;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 10px 24px rgba(23, 33, 29, 0.07);
-}
-
-.impact-card img {
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-}
-
-.impact-card div {
-  padding: 22px;
-}
-
-.impact-card p,
-.steps p {
-  color: var(--muted);
-}
-
-.checklist-section {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(280px, 1.05fr);
-  gap: 36px;
-  align-items: start;
-  background: var(--white);
-}
-
-.checklist {
-  display: grid;
-  gap: 12px;
-}
-
-.checklist label {
-  display: flex;
-  min-height: 56px;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-weight: 700;
-}
-
-.checklist input {
-  width: 20px;
-  height: 20px;
-  accent-color: var(--leaf);
-  flex: 0 0 auto;
-}
-
-.checklist label.done {
-  color: var(--leaf-dark);
-  background: #e9f7ed;
-  border-color: #b8dfc6;
-}
-
-.school-section {
-  display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 38px;
-  align-items: start;
-  background: #eef6f7;
-}
-
-.steps {
-  display: grid;
-  gap: 14px;
-}
-
-.steps article {
-  min-height: 150px;
-  padding: 22px;
-  background: var(--white);
-  border-left: 6px solid var(--aqua);
-  border-radius: 8px;
-}
-
-.steps span {
-  display: inline-block;
-  margin-bottom: 12px;
-  color: var(--coral);
-  font-weight: 900;
-}
-
-.calculator-section {
-  background: var(--white);
-}
-
-.calculator-section .section-heading p {
-  max-width: 720px;
-}
-
-.lights-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.18fr) minmax(290px, 0.82fr);
-  gap: 24px;
-  align-items: stretch;
-}
-
-.light-calculator {
-  display: grid;
-  align-content: start;
-  gap: 16px;
-}
-
-.calculator {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(150px, 1fr)) auto;
-  gap: 16px;
-  align-items: end;
-}
-
-.calculator label {
-  display: grid;
-  gap: 8px;
-  color: var(--muted);
-  font-weight: 800;
-}
-
-.calculator input,
-.calculator select {
-  width: 100%;
-  min-height: 50px;
-  padding: 10px 12px;
-  color: var(--ink);
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.result {
-  max-width: 820px;
-  margin: 0;
-  color: var(--leaf-dark);
-  font-size: 1.14rem;
-  font-weight: 800;
-}
-
-.formula-note,
-.source-note {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.95rem;
-}
-
-.source-note {
-  padding: 14px 16px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.source-note a {
-  color: var(--leaf-dark);
-  font-weight: 800;
-}
-
-.fact-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 24px;
-}
-
-.fact-card {
-  min-height: 205px;
-  padding: 24px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  transform: translateY(18px);
-  opacity: 0;
-  transition: transform 700ms ease, opacity 700ms ease, border-color 300ms ease;
-}
-
-.fact-card.is-visible {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.fact-card:hover {
-  border-color: var(--aqua);
-}
-
-.fact-card span {
-  display: block;
-  margin-bottom: 14px;
-  color: var(--leaf);
-  font-size: 2rem;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-}
-
-.fact-card p {
-  color: var(--muted);
-}
-
-.waste-year-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(240px, 0.8fr);
-  gap: 24px;
-  align-items: center;
-  margin-top: 24px;
-  padding: 28px;
-  color: var(--white);
-  background:
-    linear-gradient(135deg, rgba(45, 90, 61, 0.95), rgba(26, 58, 42, 1)),
-    var(--leaf-dark);
-  border: 1px solid rgba(200, 230, 208, 0.2);
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-}
-
-.waste-year-panel::before,
-.waste-year-panel::after {
-  content: "";
-  position: absolute;
-  border: 1px solid rgba(200, 230, 208, 0.12);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.waste-year-panel::before {
-  width: 280px;
-  height: 280px;
-  right: -90px;
-  top: -120px;
-  animation: pulseRing 6s ease-in-out infinite;
-}
-
-.waste-year-panel::after {
-  width: 180px;
-  height: 180px;
-  left: -70px;
-  bottom: -90px;
-  animation: pulseRing 7s ease-in-out infinite 1s;
-}
-
-.waste-year-panel > * {
-  position: relative;
-  z-index: 1;
-}
-
-.waste-year-panel h3 {
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 2rem;
-}
-
-.waste-year-panel p:not(.eyebrow) {
-  color: var(--mist);
-}
-
-.waste-meter {
-  min-height: 210px;
-  display: grid;
-  align-items: end;
-  justify-items: center;
-  gap: 14px;
-  padding: 18px;
-  background: rgba(26, 58, 42, 0.52);
-  border: 1px solid rgba(200, 230, 208, 0.2);
-  border-radius: 8px;
-}
-
-.waste-meter span {
-  display: block;
-  width: 84px;
-  height: 150px;
-  transform-origin: bottom;
-  transform: scaleY(0.18);
-  background: linear-gradient(0deg, var(--amber), var(--sun));
-  border-radius: 8px 8px 0 0;
-  box-shadow: 0 0 28px rgba(240, 192, 96, 0.3);
-  transition: transform 600ms ease;
-}
-
-.waste-meter strong {
-  color: var(--sun);
-  font-family: "Space Mono", monospace;
-}
-
-.quick-facts {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 18px;
-}
-
-.quick-facts p {
-  margin: 0;
-  min-height: 120px;
-  padding: 18px;
-  background: #eef6f7;
-  border-left: 5px solid var(--aqua);
-  border-radius: 8px;
-}
-
-.faq-section {
-  background: var(--paper);
-}
-
-.faq-list {
-  display: grid;
-  gap: 12px;
-  max-width: 920px;
-}
-
-.faq-item {
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  overflow: hidden;
-  transform: translateY(12px);
-  opacity: 0;
-  transition: transform 650ms ease, opacity 650ms ease;
-}
-
-.faq-item.is-visible {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.faq-question {
-  display: flex;
-  width: 100%;
-  min-height: 64px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 18px 20px;
-  color: var(--ink);
-  background: transparent;
-  border: 0;
-  cursor: pointer;
-  font-weight: 900;
-  text-align: left;
-}
-
-.faq-question span {
-  display: inline-grid;
-  width: 30px;
-  height: 30px;
-  flex: 0 0 auto;
-  place-items: center;
-  color: var(--white);
-  background: var(--leaf);
-  border-radius: 8px;
-  transition: transform 250ms ease, background 250ms ease;
-}
-
-.faq-answer {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 280ms ease;
-}
-
-.faq-answer p {
-  min-height: 0;
-  overflow: hidden;
-  margin: 0;
-  padding: 0 20px;
-  color: var(--muted);
-}
-
-.faq-item.open .faq-answer {
-  grid-template-rows: 1fr;
-}
-
-.faq-item.open .faq-answer p {
-  padding-bottom: 20px;
-}
-
-.faq-item.open .faq-question span {
-  background: var(--coral);
-  transform: rotate(45deg);
-}
-
-.join-section {
-  display: grid;
-  grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
-  gap: 38px;
-  align-items: center;
-  background: var(--leaf-dark);
-  color: var(--white);
-}
-
-.join-section img {
-  width: 100%;
-  height: 440px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.join-copy p {
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 1.08rem;
-}
-
-.join-page {
-  background: var(--paper);
-}
-
-.join-hero {
-  position: relative;
-  min-height: 64vh;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  padding: 130px 6% 70px;
-  color: var(--white);
-  text-align: center;
-  background: var(--leaf-dark);
-}
-
-.join-hero-copy {
-  position: relative;
-  z-index: 1;
-  max-width: 760px;
-}
-
-.join-hero h1 {
-  color: #f2f4ee;
-}
-
-.join-hero p:not(.eyebrow) {
-  max-width: 660px;
-  margin: 22px auto 0;
-  color: var(--mist);
-  font-size: 1.2rem;
-}
-
-.join-form-section {
-  display: grid;
-  grid-template-columns: minmax(260px, 0.78fr) minmax(320px, 1.22fr);
-  gap: 32px;
-  align-items: start;
-  padding: 76px 6%;
-  background: var(--paper);
-}
-
-.join-form-copy {
-  position: sticky;
-  top: 96px;
-}
-
-.join-form-copy p:not(.eyebrow) {
-  color: var(--muted);
-}
-
-.join-form {
-  display: grid;
-  gap: 18px;
-  padding: 28px;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: 0 16px 38px rgba(26, 58, 42, 0.09);
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.form-field {
-  display: grid;
-  gap: 8px;
-}
-
-.form-field label {
-  color: var(--leaf-dark);
-  font-weight: 900;
-}
-
-.form-field input,
-.form-field select,
-.form-field textarea {
-  width: 100%;
-  min-height: 50px;
-  padding: 12px 13px;
-  color: var(--ink);
-  background: #fbfdf8;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  outline: none;
-}
-
-.form-field textarea {
-  resize: vertical;
-  line-height: 1.55;
-}
-
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
-  border-color: var(--leaf);
-  box-shadow: 0 0 0 3px rgba(74, 140, 92, 0.18);
-}
-
-.form-field input.invalid,
-.form-field textarea.invalid {
-  border-color: var(--coral);
-  box-shadow: 0 0 0 3px rgba(200, 95, 62, 0.12);
-}
-
-.phone-row {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  background: #fbfdf8;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.phone-row span {
-  padding: 0 13px;
-  color: var(--leaf-dark);
-  font-family: "Space Mono", monospace;
-  font-size: 0.9rem;
-}
-
-.phone-row input {
-  border: 0;
-  background: transparent;
-}
-
-.phone-row.invalid {
-  border-color: var(--coral);
-  box-shadow: 0 0 0 3px rgba(200, 95, 62, 0.12);
-}
-
-.field-error {
-  min-height: 20px;
-  margin: 0;
-  color: var(--coral);
-  font-size: 0.88rem;
-  font-weight: 800;
-}
-
-.form-note {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.92rem;
-}
-
-.save-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 48px;
-  padding: 12px 14px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--leaf-dark);
-  font-weight: 900;
-}
-
-.save-option input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--leaf);
-  flex: 0 0 auto;
-}
-
-.join-success {
-  grid-column: 2;
-  display: grid;
-  gap: 16px;
-  padding: 24px;
-  color: var(--white);
-  background: var(--leaf-dark);
-  border-radius: 8px;
-}
-
-.join-success[hidden] {
-  display: none;
-}
-
-.join-success h2 {
-  color: var(--paper);
-  font-size: 2rem;
-}
-
-.join-success p {
-  margin: 0;
-  color: var(--mist);
-}
-
-.integration-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.secondary-link {
-  display: inline-flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 18px;
-  color: var(--white);
-  background: transparent;
-  border: 1px solid rgba(200, 230, 208, 0.42);
-  border-radius: 8px;
-  font-weight: 900;
-  text-decoration: none;
-  transition: background 180ms ease, transform 180ms ease;
-}
-
-.secondary-link:hover {
-  background: rgba(200, 230, 208, 0.12);
-  transform: translateY(-2px);
-}
-
-.site-footer {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 26px 6%;
-  color: var(--white);
-  background: var(--ink);
-}
-
-.site-footer p {
-  margin: 0;
-  font-weight: 900;
-}
-
-.site-footer a {
-  color: var(--sun);
-  font-weight: 800;
-  text-decoration: none;
-}
-
-@keyframes pulseRing {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.65;
+﻿(function (window) {
+  const STORAGE_KEYS = {
+    user: "earthquarterUser",
+    evidence: "earthquarterEvidence",
+    draft: "earthquarterSavedPlan",
+    remember: "earthquarterRememberPlan"
+  };
+
+  const EMAILJS_CONFIG = {
+    publicKey: "oWzdB-OXZ5v0zw0_F",
+    joinServiceId: "gmail_earthquarter",
+    joinTemplateId: "template_b1qj1hj",
+    evidenceServiceId: "gmail_earthquarter",
+    // Duplicate or adjust this template in EmailJS so the file attachment field is named `image`.
+    evidenceTemplateId: "template_b1qj1hj",
+    adminEmail: "earthquarter24@gmail.com"
+  };
+
+  function readJson(key, fallback) {
+    try {
+      const raw = window.localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch {
+      return fallback;
+    }
   }
 
-  50% {
-    transform: scale(1.06);
-    opacity: 1;
-  }
-}
-
-@keyframes heroRing {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 0.58;
+  function writeJson(key, value) {
+    window.localStorage.setItem(key, JSON.stringify(value));
   }
 
-  50% {
-    transform: translate(-50%, -50%) scale(1.04);
-    opacity: 1;
-  }
-}
-
-@keyframes circuitFlow {
-  0% {
-    transform: translateX(-110%);
+  function pad(number) {
+    return String(number).padStart(2, "0");
   }
 
-  50% {
-    transform: translateX(0);
+  function getIsoWeekInfo(date = new Date()) {
+    const utc = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const dayNumber = utc.getUTCDay() || 7;
+    utc.setUTCDate(utc.getUTCDate() + 4 - dayNumber);
+    const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
+    const weekNumber = Math.ceil((((utc - yearStart) / 86400000) + 1) / 7);
+
+    return {
+      year: utc.getUTCFullYear(),
+      week: weekNumber,
+      key: `${utc.getUTCFullYear()}-W${pad(weekNumber)}`,
+      label: `Week ${weekNumber}`,
+      dateLabel: new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(date)
+    };
   }
 
-  100% {
-    transform: translateX(110%);
-  }
-}
+  function getBadgeName(weeks) {
+    if (weeks >= 30) {
+      return "Gold Earthkeeper";
+    }
 
-@media (max-width: 900px) {
-  .site-header {
-    position: fixed;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 0 5%;
-  }
+    if (weeks >= 15) {
+      return "Silver Earthkeeper";
+    }
 
-  .site-nav {
-    flex: 1;
-    justify-content: flex-end;
-    gap: 6px;
-    overflow-x: auto;
-    scrollbar-width: thin;
+    if (weeks >= 5) {
+      return "Bronze Earthkeeper";
+    }
+
+    return "Starter";
   }
 
-
-  .site-nav a {
-    padding: 7px 8px;
-    font-size: 0.72rem;
+  function getCurrentWeekKey(date = new Date()) {
+    return getIsoWeekInfo(date).key;
   }
 
-  .hero {
-    min-height: 100vh;
-    padding-top: 128px;
+  function getCurrentWeekLabel(date = new Date()) {
+    const info = getIsoWeekInfo(date);
+    return `${info.label} (${info.dateLabel})`;
   }
 
-  h1 {
-    font-size: 4rem;
+  function loadUser() {
+    return readJson(STORAGE_KEYS.user, null);
   }
 
-  h2 {
-    font-size: 2.1rem;
+  function saveUser(user) {
+    const nextUser = {
+      sessionsCompleted: 0,
+      evidenceSubmitted: 0,
+      badge: "Starter",
+      joinedAt: new Date().toISOString(),
+      ...user
+    };
+
+    nextUser.badge = nextUser.badge || getBadgeName(Number(nextUser.sessionsCompleted) || 0);
+    writeJson(STORAGE_KEYS.user, nextUser);
+    return nextUser;
   }
 
-  .intro-section,
-  .founder-section,
-  .countdown-action,
-  .join-form-section,
-  .checklist-section,
-  .school-section,
-  .join-section {
-    grid-template-columns: 1fr;
+  function clearUser() {
+    window.localStorage.removeItem(STORAGE_KEYS.user);
   }
 
-  .join-form-copy {
-    position: static;
+  function loadEvidenceRecords() {
+    const records = readJson(STORAGE_KEYS.evidence, []);
+    return Array.isArray(records) ? records : [];
   }
 
-  .join-success {
-    grid-column: auto;
+  function getRecordedEvidenceHashes() {
+    return loadEvidenceRecords()
+      .map((record) => record && record.imageHash)
+      .filter(Boolean);
   }
 
-  .impact-grid,
-  .calculator,
-  .lights-layout,
-  .fact-grid,
-  .waste-year-panel,
-  .quick-facts {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .site-header {
-    min-height: 70px;
-    padding: 0 5%;
+  async function hashFile(file) {
+    const buffer = await file.arrayBuffer();
+    const digest = await window.crypto.subtle.digest("SHA-256", buffer);
+    return Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
   }
 
-  .brand {
-    font-size: 1.2rem;
+  function getImageDimensions(file) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve({ width: image.naturalWidth || 0, height: image.naturalHeight || 0 });
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("We could not read that image. Please use a normal photo file."));
+      };
+
+      image.src = url;
+    });
   }
 
-  .site-header {
-    align-items: flex-start;
-    flex-direction: column;
-    justify-content: center;
-    gap: 8px;
-    min-height: 104px;
-    padding-top: 10px;
-    padding-bottom: 10px;
+  async function validateEvidenceFile(file) {
+    if (!file || !file.type || !file.type.startsWith("image/")) {
+      throw new Error("Please upload a real image file.");
+    }
+
+    const dimensions = await getImageDimensions(file);
+    const hash = await hashFile(file);
+    if (getRecordedEvidenceHashes().includes(hash)) {
+      throw new Error("This photo was already used before. Please upload a different Earthquarter photo.");
+    }
+
+    return { hash, dimensions };
   }
 
-  .site-nav {
-    width: 100%;
-    justify-content: flex-start;
+  function saveEvidenceRecords(records) {
+    writeJson(STORAGE_KEYS.evidence, records);
+    return records;
   }
 
-
-
-
-  .site-nav a {
-    min-height: 34px;
+  function parseTimeParts(timeValue) {
+    const [rawHours, rawMinutes] = String(timeValue || "19:00").split(":").map(Number);
+    return {
+      hours: Number.isFinite(rawHours) ? rawHours : 19,
+      minutes: Number.isFinite(rawMinutes) ? rawMinutes : 0
+    };
   }
 
-  .hero,
-  .countdown-action,
-  .join-hero,
-  .join-form-section,
-  .intro-section,
-  .founder-section,
-  .impact-section,
-  .checklist-section,
-  .school-section,
-  .calculator-section,
-  .join-section {
-    padding-left: 5%;
-    padding-right: 5%;
+  function buildDateAtTime(baseDate, timeValue) {
+    const { hours, minutes } = parseTimeParts(timeValue);
+    const date = new Date(baseDate);
+    date.setHours(hours, minutes, 0, 0);
+    return date;
   }
 
+  function getEvidenceUploadWindow(user, now = new Date()) {
+    const sessionMinutes = 15;
+    const uploadHours = 24;
+    const hasWeekday = typeof user.dayOfWeek === "number" && Number.isFinite(user.dayOfWeek);
+    const planStart = getPlanStartTime(user || {});
+    let sessionStart = buildDateAtTime(now, planStart.value);
 
-  .hero {
-    min-height: 100vh;
-    padding-top: 146px;
-    padding-bottom: 50px;
+    if (hasWeekday) {
+      const currentDay = now.getDay();
+      const offset = user.dayOfWeek - currentDay;
+      sessionStart.setDate(sessionStart.getDate() + offset);
+    }
+
+    const sessionEnd = new Date(sessionStart.getTime() + sessionMinutes * 60 * 1000);
+    const uploadDeadline = new Date(sessionEnd.getTime() + uploadHours * 60 * 60 * 1000);
+
+    let status = "open";
+    if (now < sessionEnd) {
+      status = "too_early";
+    } else if (now > uploadDeadline) {
+      status = "expired";
+    }
+
+    return {
+      status,
+      canUpload: status === "open",
+      sessionStart,
+      sessionEnd,
+      uploadDeadline
+    };
   }
 
-  h1 {
-    font-size: 3rem;
+  function formatDateTime(date) {
+    return new Intl.DateTimeFormat("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit"
+    }).format(date);
+  }
+  function formatDisplayTime(timeValue) {
+    const { hours, minutes } = parseTimeParts(timeValue);
+    const period = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 || 12;
+    return `${hour12}:${String(minutes).padStart(2, "0")} ${period}`;
   }
 
-  h2 {
-    font-size: 1.85rem;
+  function getPlanStartTime(plan) {
+    const fallback = plan && plan.time ? plan.time : "19:00";
+    const message = String((plan && plan.message) || "");
+    const rangeRegex = /\b(?:from\s+|between\s+)?(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?\s*(?:to|until|till|-|–|—)\s*(0?[1-9]|1[0-2])(?:[:.](\d{2}))?\s*(a\.?m\.?|p\.?m\.?)\b/i;
+    const match = message.match(rangeRegex);
+
+    if (!match) {
+      return {
+        value: fallback,
+        display: plan && plan.displayTime ? plan.displayTime : formatDisplayTime(fallback)
+      };
+    }
+
+    let hours = Number(match[1]);
+    const minutes = match[2] ? Number(match[2]) : 0;
+    const period = (match[3] || match[6] || "").toLowerCase();
+
+    if (minutes > 59) {
+      return {
+        value: fallback,
+        display: plan && plan.displayTime ? plan.displayTime : formatDisplayTime(fallback)
+      };
+    }
+
+    if (period.startsWith("p") && hours !== 12) {
+      hours += 12;
+    }
+
+    if (period.startsWith("a") && hours === 12) {
+      hours = 0;
+    }
+
+    const value = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    return {
+      value,
+      display: formatDisplayTime(value)
+    };
   }
 
-  .hero-copy {
-    font-size: 1.22rem;
+  function getEvidenceForWeek(weekKey = getCurrentWeekKey()) {
+    return loadEvidenceRecords().find((record) => record.weekKey === weekKey) || null;
   }
 
-  .hero-sub {
-    margin-bottom: 34px;
-    font-size: 1.25rem;
+  function upsertEvidenceRecord(record) {
+    const records = loadEvidenceRecords();
+    const index = records.findIndex((item) => item.weekKey === record.weekKey);
+
+    if (index >= 0) {
+      records[index] = { ...records[index], ...record };
+    } else {
+      records.unshift(record);
+    }
+
+    saveEvidenceRecords(records);
+    return records;
   }
 
-  .timer-panel {
-    padding: 18px;
+  function updateUserForEvidence(record) {
+    const user = loadUser() || {};
+    const existing = getEvidenceForWeek(record.weekKey);
+
+    if (!existing) {
+      user.sessionsCompleted = (Number(user.sessionsCompleted) || 0) + 1;
+      user.evidenceSubmitted = (Number(user.evidenceSubmitted) || 0) + 1;
+    }
+
+    user.badge = getBadgeName(Number(user.sessionsCompleted) || 0);
+    user.lastCompletedWeek = record.weekKey;
+    user.lastEvidenceAt = record.submittedAt;
+    user.lastEvidenceFileName = record.fileName;
+    saveUser(user);
+    return user;
   }
 
-  .timer-display {
-    min-height: 76px;
-    font-size: 3.1rem;
+  function getLatestEvidence() {
+    const records = loadEvidenceRecords();
+    return records.length ? records[0] : null;
   }
 
-  .timer-actions,
-  .primary-button,
-  .secondary-button,
-  .ghost-button,
-  .primary-link {
-    width: 100%;
+  function getLatestWeekSummary() {
+    const record = getLatestEvidence();
+    if (!record) {
+      return null;
+    }
+
+    return {
+      weekKey: record.weekKey,
+      weekLabel: record.weekLabel,
+      status: record.status,
+      submittedAt: record.submittedAt,
+      fileName: record.fileName
+    };
   }
 
-  .intro-section,
-  .countdown-action,
-  .join-form-section,
-  .founder-section,
-  .impact-section,
-  .checklist-section,
-  .school-section,
-  .calculator-section,
-  .faq-section,
-  .join-section {
-    padding-top: 58px;
-    padding-bottom: 58px;
+  function nextCalendarStart(timeValue) {
+    const [hours, minutes] = String(timeValue || "19:00").split(":").map(Number);
+    const start = new Date();
+    start.setHours(hours, minutes, 0, 0);
+
+    if (start <= new Date()) {
+      start.setDate(start.getDate() + 1);
+    }
+
+    return start;
   }
 
-  .mini-circuit {
-    grid-template-columns: 1fr;
+  function nextCalendarStartForDay(timeValue, weekday) {
+    const [hours, minutes] = String(timeValue || "19:00").split(":").map(Number);
+    const start = new Date();
+    start.setHours(hours, minutes, 0, 0);
+
+    if (typeof weekday === "number" && Number.isFinite(weekday)) {
+      const currentDay = start.getDay();
+      let delta = (weekday - currentDay + 7) % 7;
+
+      if (delta === 0 && start <= new Date()) {
+        delta = 7;
+      }
+
+      start.setDate(start.getDate() + delta);
+      return start;
+    }
+
+    if (start <= new Date()) {
+      start.setDate(start.getDate() + 1);
+    }
+
+    return start;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
+  function formatCalendarDate(date) {
+    return [
+      date.getFullYear(),
+      pad(date.getMonth() + 1),
+      pad(date.getDate()),
+      "T",
+      pad(date.getHours()),
+      pad(date.getMinutes()),
+      pad(date.getSeconds())
+    ].join("");
   }
 
-  .join-form {
-    padding: 20px;
+  function buildRecurringCalendarLink(submission) {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
+    const planStart = getPlanStartTime(submission || {});
+    const startDate = nextCalendarStartForDay(planStart.value, submission.dayOfWeek);
+    const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
+    const start = formatCalendarDate(startDate);
+    const end = formatCalendarDate(endDate);
+    const title = "Earthquarter weekly switch-off";
+    const details = [
+      `Weekly Earthquarter reminder for ${submission.name}.`,
+      "",
+      "Switch off all electricity and electrical devices for 15 minutes, except urgent medical or life-saving needs.",
+      "",
+      `Plan message: ${submission.message}`
+    ].join("\n");
+
+    return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${start}/${end}&details=${encodeURIComponent(details)}&recur=${encodeURIComponent("RRULE:FREQ=WEEKLY;INTERVAL=1")}&ctz=${encodeURIComponent(timezone)}`;
   }
 
-
-
-
-
-  .mini-circuit strong {
-    white-space: normal;
+  function hasEmailJsConfig() {
+    return Boolean(
+      window.emailjs &&
+      EMAILJS_CONFIG.publicKey &&
+      !EMAILJS_CONFIG.publicKey.startsWith("YOUR_") &&
+      EMAILJS_CONFIG.joinServiceId &&
+      !EMAILJS_CONFIG.joinServiceId.startsWith("YOUR_") &&
+      EMAILJS_CONFIG.joinTemplateId &&
+      !EMAILJS_CONFIG.joinTemplateId.startsWith("YOUR_")
+    );
   }
 
-  .image-band {
-    min-height: 470px;
+  function hasEvidenceEmailJsConfig() {
+    return Boolean(
+      hasEmailJsConfig() &&
+      EMAILJS_CONFIG.evidenceTemplateId &&
+      !EMAILJS_CONFIG.evidenceTemplateId.startsWith("YOUR_")
+    );
   }
 
+  function initEmailJs() {
+    if (!hasEmailJsConfig()) {
+      return false;
+    }
 
-  .image-band-copy {
-    padding-left: 5%;
-    padding-right: 5%;
-    padding-bottom: 48px;
+    window.emailjs.init({
+      publicKey: EMAILJS_CONFIG.publicKey,
+      limitRate: {
+        id: "earthquarter",
+        throttle: 1000
+      }
+    });
+
+    return true;
   }
 
-  .impact-card img,
-  .join-section img {
-    height: 250px;
+  function sendJoinEmail(params) {
+    if (!initEmailJs()) {
+      return Promise.reject(new Error("EmailJS is not configured yet."));
+    }
+
+    return window.emailjs.send(EMAILJS_CONFIG.joinServiceId, EMAILJS_CONFIG.joinTemplateId, {
+      to_email: params.email,
+      name: params.name,
+      message: params.message,
+      email: params.email,
+      phone: params.phone,
+      address: params.address,
+      display_time: params.displayTime,
+      reply_to: EMAILJS_CONFIG.adminEmail
+    });
   }
 
-  .founder-photo-panel img {
-    max-height: 460px;
+  function setFormValue(form, name, value) {
+    let input = form.querySelector(`[name="${name}"]`);
+    if (!input) {
+      input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      form.appendChild(input);
+    }
+    input.value = value;
   }
 
+  function sendEvidenceForm(form, toEmail) {
+    if (!hasEvidenceEmailJsConfig()) {
+      return Promise.reject(new Error("Evidence email is not configured yet. Check the EmailJS evidence template in earthquarter-app.js."));
+    }
 
-  .site-footer {
-    flex-direction: column;
-  }
-}
+    if (!initEmailJs()) {
+      return Promise.reject(new Error("EmailJS is not configured yet."));
+    }
 
-.email-status {
-  min-height: 24px;
-  margin: 2px 0 0;
-  font-size: 0.92rem;
-  font-weight: 800;
-}
+    setFormValue(form, "to_email", toEmail || EMAILJS_CONFIG.adminEmail);
 
-.email-status.is-pending {
-  color: var(--amber);
-}
-
-.email-status.is-success {
-  color: var(--leaf);
-}
-
-.email-status.is-error {
-  color: var(--coral);
-}
-
-.dashboard-page,
-.evidence-page,
-.history-page {
-  background:
-    radial-gradient(circle at top left, rgba(240, 192, 96, 0.12), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(74, 140, 92, 0.12), transparent 24%),
-    var(--paper);
-}
-
-.dashboard-shell,
-.page-shell {
-  padding: 120px 6% 80px;
-}
-
-.dashboard-hero,
-.panel-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-  gap: 28px;
-  align-items: center;
-  margin-bottom: 28px;
-}
-
-.dashboard-copy h1,
-.panel-copy h1 {
-  font-size: clamp(2.8rem, 5vw, 4.8rem);
-}
-
-.history-page .panel-copy h1,
-.evidence-page .panel-copy h1 {
-  color: var(--leaf-dark);
-}
-
-.history-page .panel-copy p,
-.evidence-page .panel-copy p {
-  color: var(--muted);
-}
-
-.dashboard-copy p,
-.panel-copy p,
-.panel-status p {
-  color: var(--muted);
-  font-size: 1.05rem;
-}
-
-.dashboard-art {
-  position: relative;
-  padding: 14px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(45, 90, 61, 0.16), rgba(240, 192, 96, 0.22));
-  box-shadow: 0 22px 44px rgba(26, 58, 42, 0.12);
-}
-
-.dashboard-art img {
-  width: 100%;
-  min-height: 300px;
-  border-radius: 18px;
-  object-fit: cover;
-}
-
-.dashboard-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.dashboard-actions .primary-link,
-.dashboard-actions .secondary-link {
-  border-radius: 14px;
-  box-shadow: 0 12px 28px rgba(26, 58, 42, 0.12);
-}
-
-.dashboard-actions .secondary-link {
-  color: var(--leaf-dark);
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(45, 90, 61, 0.18);
-}
-
-.dashboard-actions .secondary-link:hover {
-  background: #ffffff;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-}
-
-.dash-card,
-.form-card,
-.panel-status {
-  display: grid;
-  gap: 14px;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  box-shadow: 0 18px 38px rgba(26, 58, 42, 0.08);
-}
-
-.dash-card h2,
-.panel-status h2 {
-  font-size: 2rem;
-}
-
-.card-label {
-  margin: 0;
-  color: var(--coral);
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.mini-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.mini-stats div {
-  padding: 16px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-}
-
-.mini-stats strong {
-  display: block;
-  color: var(--leaf-dark);
-  font-family: "Playfair Display", Georgia, serif;
-  font-size: 2rem;
-}
-
-.mini-stats span {
-  color: var(--muted);
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-
-.status-chip {
-  display: inline-flex;
-  width: fit-content;
-  min-height: 36px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  border-radius: 999px;
-  background: #fff5da;
-  color: var(--amber);
-  font-weight: 900;
-}
-
-.status-chip.is-success {
-  background: #e8f6ea;
-  color: var(--leaf-dark);
-}
-
-.status-chip.is-pending {
-  background: #fff5da;
-  color: var(--amber);
-}
-
-.evidence-preview,
-.evidence-preview-area {
-  min-height: 220px;
-  display: grid;
-  place-items: center;
-  background: var(--paper);
-  border: 1px dashed var(--line);
-  border-radius: 18px;
-  overflow: hidden;
-  color: var(--muted);
-  text-align: center;
-}
-
-.evidence-preview img,
-.evidence-preview-area img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.history-preview {
-  display: grid;
-  gap: 12px;
-}
-
-.dash-upload {
-  grid-column: 1 / -1;
-}
-
-.dashboard-evidence-form {
-  display: grid;
-  gap: 18px;
-  scroll-margin-top: 110px;
-}
-
-.check-note {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-  padding: 14px 16px;
-  background: #f7fbf4;
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  color: var(--leaf-dark);
-  font-weight: 700;
-  line-height: 1.55;
-}
-
-.check-note input {
-  margin-top: 4px;
-  accent-color: var(--leaf);
-}
-
-.dashboard-shell .dashboard-copy h1 {
-  color: var(--leaf-dark);
-  text-shadow: none;
-}
-
-.dashboard-shell .dashboard-copy h1 span {
-  color: var(--coral);
-  text-shadow: none;
-}
-
-.dashboard-shell .dashboard-copy #dashboardLead {
-  color: var(--leaf-dark);
-  opacity: 0.92;
-}
-
-.history-mini-card {
-  display: grid;
-  gap: 4px;
-  padding: 14px 16px;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-}
-
-.history-mini-card strong {
-  color: var(--leaf-dark);
-}
-
-.history-mini-card span,
-.history-mini-card small {
-  color: var(--muted);
-}
-
-.evidence-form {
-  display: grid;
-  gap: 18px;
-}
-
-.history-list {
-  display: grid;
-  gap: 18px;
-}
-
-.history-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
-  gap: 20px;
-  padding: 24px;
-  background: white;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  box-shadow: 0 18px 38px rgba(26, 58, 42, 0.08);
-}
-
-.history-card-image {
-  min-height: 190px;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: var(--paper);
-  border-radius: 18px;
-  color: var(--muted);
-}
-
-.history-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.empty-state {
-  display: grid;
-  gap: 10px;
-  place-items: center;
-  padding: 28px;
-  text-align: center;
-  color: var(--muted);
-}
-
-.empty-state h2 {
-  color: var(--leaf-dark);
-}
-
-@media (max-width: 900px) {
-  .dashboard-grid,
-  .dashboard-hero,
-  .panel-hero,
-  .history-card {
-    grid-template-columns: 1fr;
+    return window.emailjs.sendForm(
+      EMAILJS_CONFIG.evidenceServiceId,
+      EMAILJS_CONFIG.evidenceTemplateId,
+      form
+    );
   }
 
-  .dashboard-shell,
-  .page-shell {
-    padding-top: 108px;
+  async function verifyEvidenceUpload(payload) {
+    const response = await fetch("/api/verify-evidence", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const message = await response.text().catch(() => "");
+      throw new Error(message || "We could not verify this photo right now.");
+    }
+
+    return response.json();
   }
 
-  .dashboard-art img {
-    min-height: 240px;
-  }
-}
-
-@media (max-width: 560px) {
-  .dashboard-shell,
-  .page-shell {
-    padding-left: 5%;
-    padding-right: 5%;
+  function saveJoinDraft(value) {
+    writeJson(STORAGE_KEYS.draft, value);
+    window.document.cookie = `${encodeURIComponent(STORAGE_KEYS.remember)}=1; path=/`;
   }
 
-  .dash-card,
-  .form-card,
-  .panel-status,
-  .history-card {
-    padding: 18px;
+  function loadJoinDraft() {
+    return readJson(STORAGE_KEYS.draft, null);
   }
 
-  .dashboard-art img {
-    min-height: 220px;
+  function clearJoinDraft() {
+    window.localStorage.removeItem(STORAGE_KEYS.draft);
+    window.document.cookie = `${encodeURIComponent(STORAGE_KEYS.remember)}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
   }
 
-  .history-card {
-    gap: 14px;
+  function rememberJoinDraftEnabled() {
+    return /(?:^|; )earthquarterRememberPlan=1(?:;|$)/.test(window.document.cookie);
   }
-}
 
-
-  </style>
-</head>
-<body class="dashboard-page">
-  <header class="site-header">
-    <a class="brand" href="index.html" aria-label="Earthquarter home">
-      <span class="brand-earth">Earth</span><span class="brand-quarter">quarter</span>
-    </a>
-    <nav class="site-nav" aria-label="Dashboard navigation">
-      <a href="index.html#action">Home</a>
-      <a href="join.html">Join</a>
-      <a href="evidence.html">Evidence</a>
-      <a href="history.html">History</a>
-    </nav>
-  </header>
-
-  <main class="dashboard-shell">
-    <section class="dashboard-hero">
-      <div class="dashboard-copy">
-        <p class="eyebrow">Your Earthquarter dashboard</p>
-        <h1>Hi, <span id="userName">Earthkeeper</span></h1>
-        <p id="dashboardLead">Your weekly Earthquarter reminder, evidence, and progress all live here.</p>
-        <div class="dashboard-actions">
-          <a class="primary-link" id="calendarLink" href="#" target="_blank" rel="noopener">Open weekly calendar reminder</a>
-          <a class="primary-link dashboard-jump-link" href="#dashboardEvidenceForm">Upload photo</a>
-          <a class="secondary-link" id="changeDetailsLink" href="join.html">Change details</a>
-        </div>
-      </div>
-      <div class="dashboard-art">
-        <img src="arturo_anez-bulb-7746884.jpg" alt="Light bulb with leaves symbolizing Earthquarter">
-      </div>
-    </section>
-
-    <section class="dashboard-grid">
-      <article class="dash-card dash-profile">
-        <p class="card-label">Profile</p>
-        <h2 id="userBadge">Starter</h2>
-        <p id="userEmail">Not set</p>
-        <div class="mini-stats">
-          <div>
-            <strong id="sessionsCompleted">0</strong>
-            <span>Weeks done</span>
-          </div>
-          <div>
-            <strong id="evidenceSubmitted">0</strong>
-            <span>Evidence uploads</span>
-          </div>
-        </div>
-      </article>
-
-      <article class="dash-card dash-status">
-        <p class="card-label">This week</p>
-        <h2 id="weekLabel">Week 0</h2>
-        <p id="weekStatus">Checking your current Earthquarter status...</p>
-        <div class="status-chip" id="statusChip">Pending</div>
-      </article>
-
-      <article class="dash-card dash-evidence">
-        <p class="card-label">Evidence</p>
-        <h2>Photo proof</h2>
-        <div class="evidence-preview" id="evidencePreview">
-          <span>No photo uploaded yet.</span>
-        </div>
-        <p id="evidenceSummary">Upload a photo to mark this week as complete.</p>
-      </article>
-
-      <article class="dash-card dash-history">
-        <p class="card-label">History</p>
-        <h2>Recent weeks</h2>
-        <div id="historyPreview" class="history-preview"></div>
-        <a class="secondary-link" href="history.html">View full history</a>
-      </article>
-
-      <article class="dash-card dash-upload">
-        <p class="card-label">Weekly upload</p>
-        <h2>Submit your evidence photo</h2>
-        <p id="uploadCopy">Upload a photo after your 15-minute all-electricity switch-off and send it to Earthquarter.</p>
-        <form id="dashboardEvidenceForm" class="dashboard-evidence-form">
-          <div class="form-field">
-            <label for="dashboardEvidencePhoto">Evidence photo</label>
-            <input id="dashboardEvidencePhoto" name="image" type="file" accept="image/*" required>
-            <p class="field-error" id="dashboardPhotoError"></p>
-          </div>
-
-          <label class="check-note">
-            <input id="dashboardEvidenceConfirm" type="checkbox" required>
-            This photo shows my chosen Earthquarter evidence after switching off all electricity and electrical devices, except medical or life-saving needs.
-          </label>
-
-          <input type="hidden" name="name" id="dashboardEvidenceName">
-          <input type="hidden" name="email" id="dashboardEvidenceEmail">
-          <input type="hidden" name="week" id="dashboardEvidenceWeek">
-          <input type="hidden" name="week_label" id="dashboardEvidenceWeekLabel">
-          <input type="hidden" name="status" id="dashboardEvidenceStatus" value="Submitted">
-          <input type="hidden" name="to_email" id="dashboardEvidenceToEmail">
-          <input type="hidden" name="image_hash" id="dashboardEvidenceHash">
-          <input type="hidden" name="verification_status" id="dashboardEvidenceVerificationStatus" value="Pending">
-          <input type="hidden" name="message" id="dashboardEvidenceMessage">
-
-          <div class="evidence-preview-area" id="dashboardEvidencePreview">
-            <span>Preview will appear here.</span>
-          </div>
-
-          <button class="primary-button" type="submit" id="dashboardSubmitEvidence">Send evidence</button>
-          <p class="email-status" id="dashboardEvidenceSendStatus" aria-live="polite"></p>
-        </form>
-      </article>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <p>© 2026 Earthquarter Initiative</p>
-    <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
-    <a href="index.html">Back to website</a>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script src="earthquarter-app.js"></script>
-  <script src="dashboard.js"></script>
-</body>
-</html>
+  window.EarthquarterApp = {
+    storageKeys: STORAGE_KEYS,
+    emailJsConfig: EMAILJS_CONFIG,
+    getIsoWeekInfo,
+    getCurrentWeekKey,
+    getCurrentWeekLabel,
+    getBadgeName,
+    loadUser,
+    saveUser,
+    clearUser,
+    loadEvidenceRecords,
+    saveEvidenceRecords,
+    getRecordedEvidenceHashes,
+    hashFile,
+    getImageDimensions,
+    validateEvidenceFile,
+    getEvidenceUploadWindow,
+    formatDateTime,
+    getPlanStartTime,
+    getEvidenceForWeek,
+    upsertEvidenceRecord,
+    updateUserForEvidence,
+    getLatestEvidence,
+    getLatestWeekSummary,
+    buildRecurringCalendarLink,
+    hasEmailJsConfig,
+    hasEvidenceEmailJsConfig,
+    initEmailJs,
+    sendJoinEmail,
+    sendEvidenceForm,
+    verifyEvidenceUpload,
+    saveJoinDraft,
+    loadJoinDraft,
+    clearJoinDraft,
+    rememberJoinDraftEnabled
+  };
+})(window);

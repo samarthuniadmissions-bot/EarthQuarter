@@ -1,0 +1,9 @@
+Upload all files and folders from this zip together.
+
+Important:
+- Do not upload only the HTML files.
+- Keep styles.css in the same folder as index.html, join.html, dashboard.html, evidence.html, and history.html.
+- Keep the assets folder with the other files.
+- Open or upload the extracted folder, not files directly from inside the zip preview.
+
+If the website looks like plain black text and blue links, styles.css is not loading.
