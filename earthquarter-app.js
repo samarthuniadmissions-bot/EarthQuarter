@@ -429,6 +429,9 @@
       email: params.email,
       phone: params.phone,
       address: params.address,
+      bill_currency: params.billCurrency,
+      electricity_bill: params.electricityBill,
+      electricity_bill_display: params.electricityBillDisplay,
       display_time: params.displayTime,
       reply_to: EMAILJS_CONFIG.adminEmail
     });

@@ -2049,6 +2049,32 @@ h2 em {
           <p class="field-error" id="dateOfBirthError"></p>
         </div>
 
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="billCurrency">Electricity bill currency</label>
+            <select id="billCurrency" name="billCurrency">
+              <option value="">Choose currency</option>
+              <option value="INR">INR - Indian Rupee</option>
+              <option value="USD">USD - US Dollar</option>
+              <option value="GBP">GBP - British Pound</option>
+              <option value="EUR">EUR - Euro</option>
+              <option value="AUD">AUD - Australian Dollar</option>
+              <option value="CAD">CAD - Canadian Dollar</option>
+              <option value="AED">AED - UAE Dirham</option>
+              <option value="SGD">SGD - Singapore Dollar</option>
+              <option value="Other">Other currency</option>
+            </select>
+            <p class="field-error" id="billCurrencyError"></p>
+          </div>
+
+          <div class="form-field">
+            <label for="electricityBill">Your electricity bill for the past three months</label>
+            <input id="electricityBill" name="electricityBill" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Total amount for the last 3 months">
+            <p class="field-error" id="electricityBillError"></p>
+          </div>
+        </div>
+        <p class="form-note">Please enter only the total bill amount, not your electricity account number or a bill photo.</p>
+
         <div class="form-field">
           <label for="switchMessage">Message</label>
           <textarea id="switchMessage" name="switchMessage" rows="5" placeholder="Example: I will do my Earthquarter switch-off every Sunday from 7:00 PM to 7:15 PM with my family."></textarea>
@@ -2088,6 +2114,7 @@ h2 em {
   <footer class="site-footer">
     <p>© 2026 Earthquarter Initiative</p>
     <a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a>
+    <a href="privacy.html">Privacy policy</a>
     <a href="index.html">Back to website</a>
   </footer>
 

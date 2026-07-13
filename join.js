@@ -10,6 +10,8 @@ const city = document.getElementById("city");
 const region = document.getElementById("region");
 const postalCode = document.getElementById("postalCode");
 const dateOfBirth = document.getElementById("dateOfBirth");
+const billCurrency = document.getElementById("billCurrency");
+const electricityBill = document.getElementById("electricityBill");
 const switchMessage = document.getElementById("switchMessage");
 const savePlan = document.getElementById("savePlan");
 const joinSuccess = document.getElementById("joinSuccess");
@@ -84,7 +86,7 @@ function setError(id, message) {
 }
 
 function clearErrors() {
-  ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "switchMessage"].forEach((id) => {
+  ["fullName", "phoneNumber", "emailAddress", "addressType", "addressLine", "city", "region", "postalCode", "dateOfBirth", "billCurrency", "electricityBill", "switchMessage"].forEach((id) => {
     setError(id, "");
   });
 }
@@ -142,6 +144,8 @@ function fillFormFromDraft(draft) {
   city.value = draft.city || "";
   postalCode.value = draft.postalCode || "";
   dateOfBirth.value = draft.dateOfBirth || "";
+  billCurrency.value = draft.billCurrency || "";
+  electricityBill.value = draft.electricityBill || "";
   switchMessage.value = draft.message || "";
   savePlan.checked = true;
 }
@@ -322,6 +326,9 @@ function validateForm() {
   const cityValue = city.value;
   const postalCodeValue = postalCode.value.trim();
   const message = switchMessage.value.trim();
+  const billCurrencyValue = billCurrency.value;
+  const electricityBillValue = electricityBill.value.trim();
+  const electricityBillNumber = Number(electricityBillValue);
   const option = selectedCountry();
   const minPhone = Number(option.dataset.min);
   const maxPhone = Number(option.dataset.max);
@@ -370,6 +377,16 @@ function validateForm() {
 
   if (!isValidBirthDate(dateOfBirth.value)) {
     setError("dateOfBirth", "Please enter a valid date of birth. It cannot be in the future.");
+    valid = false;
+  }
+
+  if (!billCurrencyValue) {
+    setError("billCurrency", "Please choose the currency for your electricity bill.");
+    valid = false;
+  }
+
+  if (!electricityBillValue || !Number.isFinite(electricityBillNumber) || electricityBillNumber <= 0) {
+    setError("electricityBill", "Please enter the total electricity bill amount for the past three months.");
     valid = false;
   }
 
@@ -467,6 +484,9 @@ function buildSubmission() {
     postalCode: postalCode.value.trim(),
     address: `${addressLine.value.trim()}, ${city.value}, ${region.value}, ${postalCode.value.trim()}`,
     dateOfBirth: dateOfBirth.value,
+    billCurrency: billCurrency.value,
+    electricityBill: electricityBill.value.trim(),
+    electricityBillDisplay: `${billCurrency.value} ${electricityBill.value.trim()}`,
     time: messageTime.value,
     displayTime: messageTime.display,
     dayOfWeek: messageDay ? messageDay.value : null,
@@ -512,6 +532,9 @@ function saveEarthquarterUser(submission) {
     nextSession: submission.displayTime,
     displayTime: submission.displayTime,
     time: submission.time,
+    billCurrency: submission.billCurrency,
+    electricityBill: submission.electricityBill,
+    electricityBillDisplay: submission.electricityBillDisplay,
     dayOfWeek: submission.dayOfWeek,
     dayLabel: submission.dayLabel,
     message: submission.message,
@@ -531,6 +554,8 @@ function captureDraftFromForm() {
     region: region.value,
     postalCode: postalCode.value.trim(),
     dateOfBirth: dateOfBirth.value,
+    billCurrency: billCurrency.value,
+    electricityBill: electricityBill.value.trim(),
     message: switchMessage.value.trim()
   };
 }
@@ -565,6 +590,8 @@ savePlan.addEventListener("change", () => {
   city,
   postalCode,
   dateOfBirth,
+  billCurrency,
+  electricityBill,
   switchMessage
 ].forEach((field) => {
   field.addEventListener("input", () => {
