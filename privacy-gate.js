@@ -1,5 +1,5 @@
-﻿(function () {
-  const acceptedKey = "earthquarterPrivacyAccepted";
+(function () {
+  const acceptedKey = "earthquarterPrivacyAcceptedThisSession";
   const gate = document.getElementById("privacyGate");
 
   if (!gate) {
@@ -41,7 +41,7 @@
     document.documentElement.classList.remove("privacy-gate-open");
   }
 
-  if (window.localStorage.getItem(acceptedKey) === "1") {
+  if (window.sessionStorage.getItem(acceptedKey) === "1") {
     closeGate();
     return;
   }
@@ -49,6 +49,16 @@
   document.documentElement.classList.add("privacy-gate-open");
   gate.hidden = false;
 
+  if (copy) {
+    copy.scrollTop = 0;
+  }
+
+  if (checkbox) {
+    checkbox.checked = false;
+    checkbox.disabled = true;
+  }
+
+  updateAgreeButton();
   window.setTimeout(unlockAgreementIfRead, 120);
   copy?.addEventListener("scroll", unlockAgreementIfRead);
   checkbox?.addEventListener("change", updateAgreeButton);
@@ -59,13 +69,13 @@
       return;
     }
 
-    window.localStorage.setItem(acceptedKey, "1");
+    window.sessionStorage.setItem(acceptedKey, "1");
     closeGate();
   });
 
   closeButton?.addEventListener("click", () => {
     if (checkbox && checkbox.checked) {
-      window.localStorage.setItem(acceptedKey, "1");
+      window.sessionStorage.setItem(acceptedKey, "1");
       closeGate();
       return;
     }
