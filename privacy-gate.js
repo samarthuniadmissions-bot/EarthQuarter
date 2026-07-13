@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   const acceptedKey = "earthquarterPrivacyAccepted";
   const gate = document.getElementById("privacyGate");
 
@@ -26,7 +26,7 @@
     const reachedBottom = copy.scrollTop + copy.clientHeight >= copy.scrollHeight - 6;
     if (reachedBottom) {
       checkbox.disabled = false;
-      setMessage("You can now tick the box and click Agree.");
+      setMessage("");
     }
   }
 
