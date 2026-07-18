@@ -491,6 +491,45 @@
     input.value = value;
   }
 
+  function wait(ms) {
+    return new Promise((resolve) => window.setTimeout(resolve, ms));
+  }
+
+  function getEmailErrorMessage(error, fallback = "We could not send the email yet.") {
+    if (!error) {
+      return fallback;
+    }
+
+    if (typeof error === "string") {
+      return error;
+    }
+
+    const details = error.text || error.message || error.statusText || "";
+    const status = error.status ? `EmailJS ${error.status}` : "";
+    return [status, details].filter(Boolean).join(": ") || fallback;
+  }
+
+  async function sendEvidenceEmails(form, userEmail) {
+    await sendEvidenceForm(form, EMAILJS_CONFIG.adminEmail);
+
+    if (!userEmail) {
+      return { adminSent: true, userSent: false, userError: null };
+    }
+
+    await wait(1300);
+
+    try {
+      await sendEvidenceForm(form, userEmail);
+      return { adminSent: true, userSent: true, userError: null };
+    } catch (error) {
+      return {
+        adminSent: true,
+        userSent: false,
+        userError: getEmailErrorMessage(error, "The user copy email could not be sent.")
+      };
+    }
+  }
+
   function sendEvidenceForm(form, toEmail) {
     if (!hasEvidenceEmailJsConfig()) {
       return Promise.reject(new Error("Evidence email is not configured yet. Check the EmailJS evidence template in earthquarter-app.js."));
@@ -579,6 +618,8 @@
     initEmailJs,
     sendJoinEmail,
     sendEvidenceForm,
+    sendEvidenceEmails,
+    getEmailErrorMessage,
     verifyEvidenceUpload,
     saveJoinDraft,
     loadJoinDraft,

@@ -241,9 +241,11 @@ dashboardEvidenceForm.addEventListener("submit", async (event) => {
     dashboardEvidenceHash.value = validation.hash;
     dashboardEvidenceVerificationStatus.value = "Accepted by participant";
 
-    await app.sendEvidenceForm(dashboardEvidenceForm, app.emailJsConfig.adminEmail);
-    if (user.email) {
-      await app.sendEvidenceForm(dashboardEvidenceForm, user.email);
+    let emailResult = { adminSent: false, userSent: false };
+    try {
+      emailResult = await app.sendEvidenceEmails(dashboardEvidenceForm, user.email);
+    } catch (emailError) {
+      throw new Error(app.getEmailErrorMessage(emailError, "We could not email the evidence photo yet."));
     }
 
     const record = {
@@ -261,7 +263,9 @@ dashboardEvidenceForm.addEventListener("submit", async (event) => {
 
     app.upsertEvidenceRecord(record);
     app.updateUserForEvidence(record);
-    dashboardEvidenceSendStatus.textContent = "Evidence sent successfully. Refreshing dashboard...";
+    dashboardEvidenceSendStatus.textContent = emailResult.userSent
+      ? "Evidence sent to Earthquarter and your email. Refreshing dashboard..."
+      : "Evidence sent to Earthquarter and counted. Your copy email could not be sent yet.";
     dashboardEvidenceSendStatus.className = "email-status is-success";
     window.setTimeout(() => window.location.reload(), 1200);
   } catch (error) {
