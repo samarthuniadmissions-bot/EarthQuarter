@@ -11,6 +11,7 @@ const savingsResult = document.getElementById("savingsResult");
 const sessionKwh = document.getElementById("sessionKwh");
 const yearlyKwh = document.getElementById("yearlyKwh");
 const communityKwh = document.getElementById("communityKwh");
+const pledgedQuartersWeek = document.getElementById("pledgedQuartersWeek");
 const wasteYearText = document.getElementById("wasteYearText");
 const wasteMeterFill = document.getElementById("wasteMeterFill");
 const wasteMeterLabel = document.getElementById("wasteMeterLabel");
@@ -97,6 +98,9 @@ function updateLightSavings(event) {
   sessionKwh.textContent = `${formatKwh(perSession)} kWh`;
   yearlyKwh.textContent = `${formatKwh(perYear)} kWh`;
   communityKwh.textContent = `${formatKwh(communityYear)} kWh`;
+  if (pledgedQuartersWeek) {
+    pledgedQuartersWeek.textContent = String(sessions);
+  }
   wasteYearText.textContent = `In one year, completing ${sessions} Earthquarter${sessions === 1 ? "" : "s"} per week prevents about ${formatKwh(perYear)} kWh from being wasted by one participant, or ${formatKwh(communityYear)} kWh across 100 participants.`;
   wasteMeterLabel.textContent = `${formatKwh(perYear)} kWh`;
   wasteMeterFill.style.transform = `scaleY(${Math.min(1, Math.max(0.12, perYear / 25))})`;

@@ -1,4 +1,4 @@
-﻿const app = window.EarthquarterApp;
+const app = window.EarthquarterApp;
 const user = app.loadUser();
 
 if (!user || !user.name) {
@@ -38,6 +38,14 @@ const dashboardEvidenceWeekLabel = document.getElementById("dashboardEvidenceWee
 const dashboardEvidenceHash = document.getElementById("dashboardEvidenceHash");
 const dashboardEvidenceVerificationStatus = document.getElementById("dashboardEvidenceVerificationStatus");
 const dashboardEvidenceMessage = document.getElementById("dashboardEvidenceMessage");
+const monthlyBadgeName = document.getElementById("monthlyBadgeName");
+const monthlyCertificateText = document.getElementById("monthlyCertificateText");
+const monthlyQuartersCount = document.getElementById("monthlyQuartersCount");
+const yearlyQuartersCount = document.getElementById("yearlyQuartersCount");
+const certificateTitle = document.getElementById("certificateTitle");
+const certificateAward = document.getElementById("certificateAward");
+const certificatePanel = document.getElementById("certificatePanel");
+const printCertificate = document.getElementById("printCertificate");
 
 function firstName(fullName) {
   return String(fullName || "").trim().split(/\s+/)[0] || "Earthkeeper";
@@ -59,6 +67,31 @@ userEmail.textContent = user.email || "No email saved";
 userBadge.textContent = user.badge || app.getBadgeName(user.sessionsCompleted || 0);
 sessionsCompleted.textContent = String(user.sessionsCompleted || 0);
 evidenceSubmitted.textContent = String(user.evidenceSubmitted || 0);
+
+const monthRecords = app.getRecordsForMonth();
+const joinedAt = new Date(user.joinedAt || Date.now());
+const yearRecords = historyRecords.filter((record) => {
+  const submittedAt = new Date(record.submittedAt || Date.now());
+  const firstYearEnds = new Date(joinedAt);
+  firstYearEnds.setFullYear(firstYearEnds.getFullYear() + 1);
+  return submittedAt >= joinedAt && submittedAt < firstYearEnds;
+});
+const monthlyRecognition = app.getMonthlyRecognition(monthRecords.length);
+const monthLabelText = app.getMonthLabel();
+monthlyQuartersCount.textContent = String(monthRecords.length);
+yearlyQuartersCount.textContent = String(yearRecords.length);
+monthlyBadgeName.textContent = monthlyRecognition.badge;
+monthlyCertificateText.textContent = monthlyRecognition.level === "Starter"
+  ? `Complete ${monthlyRecognition.next} more Earthquarter${monthlyRecognition.next === 1 ? "" : "s"} this month to unlock Bronze.`
+  : `You earned ${monthlyRecognition.level} recognition for ${monthLabelText}.`;
+certificateTitle.textContent = `${monthlyRecognition.level} Earthquarter Certificate`;
+certificateAward.textContent = monthlyRecognition.level === "Starter"
+  ? `${displayName}, your monthly certificate will unlock after 5 completed Earthquarters in ${monthLabelText}.`
+  : `${displayName} completed ${monthRecords.length} Earthquarter${monthRecords.length === 1 ? "" : "s"} in ${monthLabelText} and earned ${monthlyRecognition.badge}.`;
+certificatePanel.classList.toggle("is-bronze", monthlyRecognition.level === "Bronze");
+certificatePanel.classList.toggle("is-silver", monthlyRecognition.level === "Silver");
+certificatePanel.classList.toggle("is-gold", monthlyRecognition.level === "Gold");
+
 weekLabel.textContent = weekInfo.label;
 const planStart = app.getPlanStartTime(user);
 dashboardLead.textContent = planStart.display
@@ -75,6 +108,10 @@ calendarLink.href = app.buildRecurringCalendarLink({
 });
 
 changeDetailsLink.href = "join.html";
+
+printCertificate.addEventListener("click", () => {
+  window.print();
+});
 
 dashboardEvidenceName.value = user.name || "";
 dashboardEvidenceEmail.value = user.email || "";

@@ -1,4 +1,4 @@
-﻿(function (window) {
+(function (window) {
   const STORAGE_KEYS = {
     user: "earthquarterUser",
     evidence: "earthquarterEvidence",
@@ -67,6 +67,51 @@
     }
 
     return "Starter";
+  }
+
+  function getMonthlyRecognition(count) {
+    const completed = Number(count) || 0;
+
+    if (completed >= 15) {
+      return { level: "Gold", badge: "Gold Earthkeeper", next: null };
+    }
+
+    if (completed >= 10) {
+      return { level: "Silver", badge: "Silver Earthkeeper", next: 15 - completed };
+    }
+
+    if (completed >= 5) {
+      return { level: "Bronze", badge: "Bronze Earthkeeper", next: 10 - completed };
+    }
+
+    return { level: "Starter", badge: "Keep Going", next: 5 - completed };
+  }
+
+  function getMonthKey(date = new Date()) {
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}`;
+  }
+
+  function getMonthLabel(date = new Date()) {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric"
+    }).format(date);
+  }
+
+  function getRecordsForMonth(date = new Date()) {
+    const monthKey = getMonthKey(date);
+    return loadEvidenceRecords().filter((record) => {
+      const submitted = new Date(record.submittedAt || Date.now());
+      return getMonthKey(submitted) === monthKey;
+    });
+  }
+
+  function getRecordsForYear(date = new Date()) {
+    const year = date.getFullYear();
+    return loadEvidenceRecords().filter((record) => {
+      const submitted = new Date(record.submittedAt || Date.now());
+      return submitted.getFullYear() === year;
+    });
   }
 
   function getCurrentWeekKey(date = new Date()) {
@@ -279,14 +324,12 @@
 
   function updateUserForEvidence(record) {
     const user = loadUser() || {};
-    const existing = getEvidenceForWeek(record.weekKey);
+    const records = loadEvidenceRecords();
+    const completedWeeks = new Set(records.map((item) => item.weekKey).filter(Boolean)).size;
 
-    if (!existing) {
-      user.sessionsCompleted = (Number(user.sessionsCompleted) || 0) + 1;
-      user.evidenceSubmitted = (Number(user.evidenceSubmitted) || 0) + 1;
-    }
-
-    user.badge = getBadgeName(Number(user.sessionsCompleted) || 0);
+    user.sessionsCompleted = completedWeeks;
+    user.evidenceSubmitted = records.length;
+    user.badge = getBadgeName(completedWeeks);
     user.lastCompletedWeek = record.weekKey;
     user.lastEvidenceAt = record.submittedAt;
     user.lastEvidenceFileName = record.fileName;
@@ -508,6 +551,11 @@
     getCurrentWeekKey,
     getCurrentWeekLabel,
     getBadgeName,
+    getMonthlyRecognition,
+    getMonthKey,
+    getMonthLabel,
+    getRecordsForMonth,
+    getRecordsForYear,
     loadUser,
     saveUser,
     clearUser,
