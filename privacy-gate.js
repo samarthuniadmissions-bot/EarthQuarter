@@ -1,5 +1,5 @@
 (function () {
-  const acceptedKey = "earthquarterPrivacyAcceptedThisSession";
+  const acceptedKey = "earthquarterPrivacyAccepted";
   const gate = document.getElementById("privacyGate");
 
   if (!gate) {
@@ -41,7 +41,7 @@
     document.documentElement.classList.remove("privacy-gate-open");
   }
 
-  if (window.sessionStorage.getItem(acceptedKey) === "1") {
+  if (window.localStorage.getItem(acceptedKey) === "1") {
     closeGate();
     return;
   }
@@ -69,7 +69,7 @@
       return;
     }
 
-    window.sessionStorage.setItem(acceptedKey, "1");
+    window.localStorage.setItem(acceptedKey, "1");
     closeGate();
   });
 
