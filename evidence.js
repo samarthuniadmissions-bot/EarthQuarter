@@ -1,4 +1,4 @@
-const app = window.EarthquarterApp;
+﻿const app = window.EarthquarterApp;
 const user = app.loadUser();
 
 if (!user || !user.name) {
@@ -134,6 +134,8 @@ evidenceForm.addEventListener("submit", async (event) => {
 
   try {
     const validation = await app.validateEvidenceFile(file);
+    const originalImageDataUrl = await readImageDataUrl(file);
+    await app.prepareEvidencePhotoForEmail(evidenceForm, file);
     evidenceImageHash.value = validation.hash;
     evidenceVerificationStatus.value = "Accepted by participant";
 
@@ -152,7 +154,7 @@ evidenceForm.addEventListener("submit", async (event) => {
       fileName: file.name,
       imageHash: evidenceImageHash.value,
       verificationStatus: evidenceVerificationStatus.value,
-      imageDataUrl: await readImageDataUrl(file),
+      imageDataUrl: originalImageDataUrl,
       userName: user.name,
       userEmail: user.email
     };
@@ -174,3 +176,6 @@ evidenceForm.addEventListener("submit", async (event) => {
   }
 });
 }
+
+
+

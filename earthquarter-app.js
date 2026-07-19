@@ -197,6 +197,96 @@
     return { hash, dimensions };
   }
 
+  function canvasToBlob(canvas, quality) {
+    return new Promise((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", quality);
+    });
+  }
+
+  function loadImageFromFile(file) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+
+      image.onload = () => {
+        URL.revokeObjectURL(url);
+        resolve(image);
+      };
+
+      image.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("We could not prepare this image for email."));
+      };
+
+      image.src = url;
+    });
+  }
+
+  async function compressEvidencePhotoForEmail(file, maxBytes = 30000) {
+    if (!file || !file.type || !file.type.startsWith("image/")) {
+      throw new Error("Please upload a real image file.");
+    }
+
+    const image = await loadImageFromFile(file);
+    let maxSide = 720;
+    let bestBlob = null;
+
+    while (maxSide >= 320) {
+      const scale = Math.min(1, maxSide / Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height));
+      const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+      const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = width;
+      canvas.height = height;
+      context.drawImage(image, 0, 0, width, height);
+
+      for (const quality of [0.72, 0.6, 0.48, 0.36, 0.28]) {
+        const blob = await canvasToBlob(canvas, quality);
+        if (!blob) {
+          continue;
+        }
+
+        bestBlob = blob;
+        if (blob.size <= maxBytes) {
+          return new File([blob], `earthquarter-evidence-${Date.now()}.jpg`, { type: "image/jpeg" });
+        }
+      }
+
+      maxSide -= 120;
+    }
+
+    if (bestBlob) {
+      return new File([bestBlob], `earthquarter-evidence-${Date.now()}.jpg`, { type: "image/jpeg" });
+    }
+
+    throw new Error("We could not compress this image for email. Please try a smaller photo.");
+  }
+
+  function setFormFile(form, inputName, file) {
+    const input = form.querySelector(`input[type="file"][name="${inputName}"]`);
+    if (!input || !file || typeof DataTransfer === "undefined") {
+      return false;
+    }
+
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    return true;
+  }
+
+  async function prepareEvidencePhotoForEmail(form, file) {
+    const emailFile = await compressEvidencePhotoForEmail(file);
+    if (!setFormFile(form, "image", emailFile)) {
+      throw new Error("Your browser could not prepare the compressed photo for email. Please try a smaller image.");
+    }
+
+    setFormValue(form, "image_note", "Evidence photo compressed for EmailJS delivery.");
+    setFormValue(form, "image_original_name", file.name || "Earthquarter evidence photo");
+    setFormValue(form, "image_email_size_kb", String(Math.ceil(emailFile.size / 1024)));
+    return emailFile;
+  }
+
   function saveEvidenceRecords(records) {
     writeJson(STORAGE_KEYS.evidence, records);
     return records;
@@ -604,6 +694,7 @@
     hashFile,
     getImageDimensions,
     validateEvidenceFile,
+    prepareEvidencePhotoForEmail,
     getEvidenceUploadWindow,
     formatDateTime,
     getPlanStartTime,
