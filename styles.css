@@ -1388,6 +1388,7 @@ h2 em {
 
   .site-nav a {
     min-height: 34px;
+    font-size: 0.78rem;
   }
 
   .site-nav .nav-highlight,
@@ -1395,6 +1396,7 @@ h2 em {
     min-height: 42px;
     padding-left: 14px;
     padding-right: 14px;
+    font-size: 0.86rem;
   }
 
   .founder-photo-panel {
