@@ -484,6 +484,10 @@ h2 em {
   background: #eef6f0;
 }
 
+.mobile-pledge-break {
+  display: none;
+}
+
 .image-band {
   position: relative;
   min-height: 540px;
@@ -1370,7 +1374,7 @@ h2 em {
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 700px) {
   .site-header {
     min-height: 70px;
     padding: 0 5%;
@@ -1407,6 +1411,15 @@ h2 em {
     min-height: 42px;
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .pledge-strip h2 {
+    font-size: 1.75rem;
+    white-space: nowrap;
+  }
+
+  .mobile-pledge-break {
+    display: block;
   }
 
   .hero,
@@ -2252,7 +2265,7 @@ h2 em {
         </div>
 
         <div class="pledge-strip">
-          <h2>EARTHQUARTER PLEDGE</h2>
+          <h2>EARTHQUARTER<span class="mobile-pledge-break"><br></span> PLEDGE</h2>
           <p>I pledge to be a responsible energy user and an active participant in the Earthquarter initiative. I will participate in the weekly 15-minute Earthquarter activity, encourage others to do the same, and upload photo evidence of my participation after each completed session.</p>
           <label class="save-option" for="pledgeAgree">
             <input type="checkbox" id="pledgeAgree">
