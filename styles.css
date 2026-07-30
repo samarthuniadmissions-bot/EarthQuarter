@@ -470,6 +470,10 @@ h2 em {
   background: #eef6f0;
 }
 
+.mobile-pledge-break {
+  display: none;
+}
+
 .image-band {
   position: relative;
   min-height: 540px;
@@ -1401,6 +1405,15 @@ h2 em {
 
   .founder-photo-panel {
     display: none;
+  }
+
+  .pledge-strip h2 {
+    font-size: 1.75rem;
+    white-space: nowrap;
+  }
+
+  .mobile-pledge-break {
+    display: block;
   }
 
   .founder-contact {
