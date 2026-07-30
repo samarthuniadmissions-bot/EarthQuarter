@@ -1403,6 +1403,12 @@ h2 em {
     display: none;
   }
 
+  .founder-contact {
+    margin: 8px 0 0;
+    white-space: nowrap;
+    font-size: clamp(0.68rem, 2.3vw, 0.86rem) !important;
+  }
+
   .hero,
   .countdown-action,
   .join-hero,
