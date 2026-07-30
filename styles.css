@@ -1356,7 +1356,7 @@ h2 em {
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 700px) {
   .site-header {
     min-height: 70px;
     padding: 0 5%;
