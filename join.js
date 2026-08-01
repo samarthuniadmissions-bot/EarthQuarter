@@ -508,7 +508,34 @@ async function sendWelcomeEmail(submission) {
     throw new Error("EmailJS is not configured yet. Add your public key, service ID, and template ID in earthquarter-app.js.");
   }
 
-  return app.sendJoinEmail(submission);
+  try {
+    return await app.sendJoinEmail(submission);
+  } catch (emailJsError) {
+    // Keep the join confirmation working if EmailJS is temporarily unavailable.
+    const fallbackResponse = await fetch("https://formsubmit.co/ajax/earthquarter24@gmail.com", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: new URLSearchParams({
+        _subject: "New Earthquarter participant",
+        _template: "table",
+        name: submission.name,
+        email: submission.email,
+        phone: submission.phone,
+        address: submission.address,
+        electricity_bill: submission.electricityBillDisplay,
+        display_time: submission.displayTime,
+        day: submission.dayLabel || "Not provided",
+        message: submission.message,
+        _replyto: submission.email
+      })
+    });
+
+    if (!fallbackResponse.ok) {
+      throw emailJsError;
+    }
+
+    return { provider: "FormSubmit" };
+  }
 }
 
 function updateCalendarLink(submission) {
