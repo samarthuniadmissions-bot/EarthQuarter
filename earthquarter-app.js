@@ -123,6 +123,28 @@
     return `${info.label} (${info.dateLabel})`;
   }
 
+  function getParticipantWeekInfo(user, date = new Date()) {
+    const joinedAt = new Date((user && user.joinedAt) || date);
+    const joinedDay = new Date(joinedAt);
+    joinedDay.setHours(0, 0, 0, 0);
+    const currentDay = new Date(date);
+    currentDay.setHours(0, 0, 0, 0);
+    const elapsedDays = Math.max(0, Math.floor((currentDay - joinedDay) / 86400000));
+    const week = Math.floor(elapsedDays / 7) + 1;
+    const joinedKey = [joinedDay.getFullYear(), pad(joinedDay.getMonth() + 1), pad(joinedDay.getDate())].join("-");
+
+    return {
+      week,
+      key: `${joinedKey}-W${pad(week)}`,
+      label: `Week ${week}`,
+      dateLabel: new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(date)
+    };
+  }
+
   function loadUser() {
     return readJson(STORAGE_KEYS.user, null);
   }
@@ -313,11 +335,15 @@
     const uploadHours = 24;
     const hasWeekday = typeof user.dayOfWeek === "number" && Number.isFinite(user.dayOfWeek);
     const planStart = getPlanStartTime(user || {});
-    let sessionStart = buildDateAtTime(now, planStart.value);
+    const participantWeek = getParticipantWeekInfo(user, now);
+    const joinedAt = new Date(user.joinedAt || now);
+    const weekStart = new Date(joinedAt);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() + (participantWeek.week - 1) * 7);
+    let sessionStart = buildDateAtTime(weekStart, planStart.value);
 
     if (hasWeekday) {
-      const currentDay = now.getDay();
-      const offset = user.dayOfWeek - currentDay;
+      const offset = (user.dayOfWeek - weekStart.getDay() + 7) % 7;
       sessionStart.setDate(sessionStart.getDate() + offset);
     }
 
@@ -395,8 +421,15 @@
     };
   }
 
-  function getEvidenceForWeek(weekKey = getCurrentWeekKey()) {
-    return loadEvidenceRecords().find((record) => record.weekKey === weekKey) || null;
+  function getEvidenceForWeek(weekKey = getCurrentWeekKey(), user = null) {
+    return loadEvidenceRecords().find((record) => {
+      if (record.weekKey === weekKey) {
+        return true;
+      }
+
+      // Match older records saved with calendar-week keys after the cohort change.
+      return Boolean(user && record.submittedAt && getParticipantWeekInfo(user, new Date(record.submittedAt)).key === weekKey);
+    }) || null;
   }
 
   function upsertEvidenceRecord(record) {
@@ -678,6 +711,7 @@
     storageKeys: STORAGE_KEYS,
     emailJsConfig: EMAILJS_CONFIG,
     getIsoWeekInfo,
+    getParticipantWeekInfo,
     getCurrentWeekKey,
     getCurrentWeekLabel,
     getBadgeName,

@@ -4,8 +4,8 @@ const user = app.loadUser();
 if (!user || !user.name) {
   window.location.replace("join.html");
 } else {
-  const weekInfo = app.getIsoWeekInfo();
-  const currentEvidence = app.getEvidenceForWeek(weekInfo.key);
+  const weekInfo = app.getParticipantWeekInfo(user);
+  const currentEvidence = app.getEvidenceForWeek(weekInfo.key, user);
   const uploadWindow = app.getEvidenceUploadWindow(user);
 
 const evidenceForm = document.getElementById("evidenceForm");
@@ -148,6 +148,7 @@ evidenceForm.addEventListener("submit", async (event) => {
 
     const record = {
       weekKey: weekInfo.key,
+      weekNumber: weekInfo.week,
       weekLabel: weekInfo.label,
       status: "Submitted",
       submittedAt: new Date().toISOString(),
