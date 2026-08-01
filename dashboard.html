@@ -1910,6 +1910,23 @@ h2 em {
   background: #f5cf72;
 }
 
+.certificate-actions, .certificate-modal-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.certificate-print:disabled, .certificate-share:disabled { opacity: 0.48; cursor: not-allowed; }
+.certificate-modal[hidden] { display: none; }
+.certificate-modal { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; padding: 24px; }
+.certificate-modal-backdrop { position: absolute; inset: 0; background: rgba(20, 35, 27, 0.72); }
+.certificate-dialog { position: relative; z-index: 1; width: min(980px, 100%); max-height: calc(100vh - 48px); overflow: auto; padding: 28px; background: var(--paper); border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 24px 70px rgba(0,0,0,.28); }
+.certificate-dialog h2 { margin: 0 42px 18px 0; color: var(--leaf-dark); }
+.certificate-close { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px; border: 1px solid var(--line); border-radius: 50%; background: var(--white); color: var(--leaf-dark); font-size: 1.6rem; cursor: pointer; }
+.certificate-art { position: relative; overflow: hidden; background: #eef0ed; border: 1px solid var(--line); }
+.certificate-art img { display: block; width: 100%; height: auto; }
+.certificate-recipient, .certificate-issue-date, .certificate-dot-cover { position: absolute; }
+.certificate-recipient { top: 31.5%; left: 15%; width: 70%; color: #303536; font-family: "Playfair Display", Georgia, serif; font-size: clamp(1.2rem, 4vw, 3rem); text-align: center; }
+.certificate-issue-date { bottom: 16.5%; left: 8%; width: 25%; color: #303536; font-size: clamp(.65rem, 1.6vw, 1.1rem); text-align: center; }
+.certificate-dot-cover { top: 38.5%; left: 48.7%; width: 2.6%; height: 4.2%; background: #f1f3f2; }
+.certificate-modal-open { overflow: hidden; }
+@media print { body > *:not(.certificate-modal) { display: none !important; } .certificate-modal { position: static; display: block; padding: 0; } .certificate-modal-backdrop, .certificate-dialog h2, .certificate-close, .certificate-modal-actions { display: none !important; } .certificate-dialog { width: 100%; max-height: none; padding: 0; border: 0; box-shadow: none; } }
+
 .dash-upload {
   grid-column: 1 / -1;
 }
@@ -2155,7 +2172,10 @@ h2 em {
           <p id="certificateAward">Submit evidence to start building this month's certificate.</p>
           <small>Bronze: 5 monthly Earthquarters, Silver: 10, Gold: 15</small>
         </div>
-        <button class="secondary-link certificate-print" id="printCertificate" type="button">Print certificate</button>
+        <div class="certificate-actions">
+          <button class="secondary-link certificate-print" id="openCertificate" type="button" disabled>Open certificate</button>
+          <button class="secondary-link certificate-share" id="shareCertificate" type="button" disabled>Share certificate</button>
+        </div>
       </article>
 
       <article class="dash-card dash-upload">
@@ -2194,6 +2214,24 @@ h2 em {
       </article>
     </section>
   </main>
+
+  <div class="certificate-modal" id="certificateModal" hidden>
+    <div class="certificate-modal-backdrop" data-close-certificate></div>
+    <section class="certificate-dialog" role="dialog" aria-modal="true" aria-labelledby="certificateDialogTitle">
+      <button class="certificate-close" type="button" data-close-certificate aria-label="Close certificate">&times;</button>
+      <h2 id="certificateDialogTitle">Your Bronze Certificate</h2>
+      <div class="certificate-art" id="certificateArt">
+        <img src="assets/bronze-certificate-template.png" alt="Bronze Earthquarter certificate template">
+        <span class="certificate-dot-cover" aria-hidden="true"></span>
+        <strong class="certificate-recipient" id="certificateRecipient"></strong>
+        <strong class="certificate-issue-date" id="certificateIssueDate"></strong>
+      </div>
+      <div class="certificate-modal-actions">
+        <button class="primary-button" id="printCertificate" type="button">Print certificate</button>
+        <button class="secondary-link certificate-share" id="shareCertificateModal" type="button">Share certificate</button>
+      </div>
+    </section>
+  </div>
 
 
   <footer class="site-footer">

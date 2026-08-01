@@ -45,7 +45,13 @@ const yearlyQuartersCount = document.getElementById("yearlyQuartersCount");
 const certificateTitle = document.getElementById("certificateTitle");
 const certificateAward = document.getElementById("certificateAward");
 const certificatePanel = document.getElementById("certificatePanel");
+const openCertificate = document.getElementById("openCertificate");
+const shareCertificate = document.getElementById("shareCertificate");
+const certificateModal = document.getElementById("certificateModal");
+const certificateRecipient = document.getElementById("certificateRecipient");
+const certificateIssueDate = document.getElementById("certificateIssueDate");
 const printCertificate = document.getElementById("printCertificate");
+const shareCertificateModal = document.getElementById("shareCertificateModal");
 
 function firstName(fullName) {
   return String(fullName || "").trim().split(/\s+/)[0] || "Earthkeeper";
@@ -92,6 +98,19 @@ certificatePanel.classList.toggle("is-bronze", monthlyRecognition.level === "Bro
 certificatePanel.classList.toggle("is-silver", monthlyRecognition.level === "Silver");
 certificatePanel.classList.toggle("is-gold", monthlyRecognition.level === "Gold");
 
+const bronzeUnlocked = monthRecords.length >= 5;
+const fifthRecord = bronzeUnlocked ? monthRecords[4] : null;
+const certificateDate = fifthRecord ? new Date(fifthRecord.submittedAt) : null;
+const formattedCertificateDate = certificateDate
+  ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(certificateDate)
+  : "";
+
+openCertificate.disabled = !bronzeUnlocked;
+shareCertificate.disabled = !bronzeUnlocked;
+openCertificate.textContent = bronzeUnlocked ? "Open certificate" : "Unlock at 5 Earthquarters";
+certificateRecipient.textContent = user.name || "Earthkeeper";
+certificateIssueDate.textContent = formattedCertificateDate;
+
 weekLabel.textContent = weekInfo.label;
 const planStart = app.getPlanStartTime(user);
 dashboardLead.textContent = planStart.display
@@ -109,8 +128,40 @@ calendarLink.href = app.buildRecurringCalendarLink({
 
 changeDetailsLink.href = "join.html";
 
-printCertificate.addEventListener("click", () => {
-  window.print();
+function showCertificate() {
+  if (!bronzeUnlocked) return;
+  certificateModal.hidden = false;
+  document.body.classList.add("certificate-modal-open");
+}
+
+function closeCertificate() {
+  certificateModal.hidden = true;
+  document.body.classList.remove("certificate-modal-open");
+}
+
+async function shareCertificateCard() {
+  if (!bronzeUnlocked) return;
+  const shareData = {
+    title: "Earthquarter Bronze Certificate",
+    text: `${user.name || "An Earthquarter participant"} completed 5 Earthquarters this month.`,
+    url: window.location.href
+  };
+
+  if (navigator.share) {
+    await navigator.share(shareData);
+  } else if (navigator.clipboard) {
+    await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+    shareCertificate.textContent = "Certificate link copied";
+    window.setTimeout(() => { shareCertificate.textContent = "Share certificate"; }, 1800);
+  }
+}
+
+openCertificate.addEventListener("click", showCertificate);
+shareCertificate.addEventListener("click", shareCertificateCard);
+shareCertificateModal.addEventListener("click", shareCertificateCard);
+printCertificate.addEventListener("click", () => window.print());
+document.querySelectorAll("[data-close-certificate]").forEach((element) => {
+  element.addEventListener("click", closeCertificate);
 });
 
 dashboardEvidenceName.value = user.name || "";
