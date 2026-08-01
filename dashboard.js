@@ -48,6 +48,10 @@ const certificatePanel = document.getElementById("certificatePanel");
 const openCertificate = document.getElementById("openCertificate");
 const shareCertificate = document.getElementById("shareCertificate");
 const certificateModal = document.getElementById("certificateModal");
+const certificateDialogTitle = document.getElementById("certificateDialogTitle");
+const certificateTemplate = document.getElementById("certificateTemplate");
+const certificateCompletionTitle = document.getElementById("certificateCompletionTitle");
+const certificateCompletionDescription = document.getElementById("certificateCompletionDescription");
 const certificateRecipient = document.getElementById("certificateRecipient");
 const certificateIssueDate = document.getElementById("certificateIssueDate");
 const printCertificate = document.getElementById("printCertificate");
@@ -98,16 +102,29 @@ certificatePanel.classList.toggle("is-bronze", monthlyRecognition.level === "Bro
 certificatePanel.classList.toggle("is-silver", monthlyRecognition.level === "Silver");
 certificatePanel.classList.toggle("is-gold", monthlyRecognition.level === "Gold");
 
-const bronzeUnlocked = monthRecords.length >= 5;
-const fifthRecord = bronzeUnlocked ? monthRecords[4] : null;
-const certificateDate = fifthRecord ? new Date(fifthRecord.submittedAt) : null;
+const certificateMilestone = monthRecords.length >= 15
+  ? { level: "Gold", count: 15, file: "assets/gold-certificate-template.png", record: monthRecords[14] }
+  : monthRecords.length >= 10
+    ? { level: "Silver", count: 10, file: "assets/silver-certificate-template.png", record: monthRecords[9] }
+    : monthRecords.length >= 5
+      ? { level: "Bronze", count: 5, file: "assets/bronze-certificate-template.png", record: monthRecords[4] }
+      : null;
+const bronzeUnlocked = Boolean(certificateMilestone);
+const certificateDate = certificateMilestone ? new Date(certificateMilestone.record.submittedAt) : null;
 const formattedCertificateDate = certificateDate
   ? new Intl.DateTimeFormat("en-US", { dateStyle: "long" }).format(certificateDate)
   : "";
 
 openCertificate.disabled = !bronzeUnlocked;
 shareCertificate.disabled = !bronzeUnlocked;
-openCertificate.textContent = bronzeUnlocked ? "Open certificate" : "Unlock at 5 Earthquarters";
+openCertificate.textContent = bronzeUnlocked ? `Open ${certificateMilestone.level} certificate` : "Unlock at 5 Earthquarters";
+if (certificateMilestone) {
+  certificateDialogTitle.textContent = `Your ${certificateMilestone.level} Certificate`;
+  certificateTemplate.src = certificateMilestone.file;
+  certificateTemplate.alt = `${certificateMilestone.level} Earthquarter certificate`;
+  certificateCompletionTitle.textContent = `For completing ${certificateMilestone.count} Earthquarters`;
+  certificateCompletionDescription.textContent = `This certificate recognizes participants who successfully completed ${certificateMilestone.count} Earthquarters in a month. Thank you for your dedication and commitment to help our planet.`;
+}
 certificateRecipient.textContent = user.name || "Earthkeeper";
 certificateIssueDate.textContent = formattedCertificateDate;
 
@@ -142,8 +159,8 @@ function closeCertificate() {
 async function shareCertificateCard() {
   if (!bronzeUnlocked) return;
   const shareData = {
-    title: "Earthquarter Bronze Certificate",
-    text: `${user.name || "An Earthquarter participant"} completed 5 Earthquarters this month.`,
+    title: `Earthquarter ${certificateMilestone.level} Certificate`,
+    text: `${user.name || "An Earthquarter participant"} completed ${certificateMilestone.count} Earthquarters this month.`,
     url: window.location.href
   };
 
