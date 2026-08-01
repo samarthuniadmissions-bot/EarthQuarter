@@ -5,8 +5,8 @@ if (!user || !user.name) {
   window.location.replace("join.html");
 }
 
-const weekInfo = app.getIsoWeekInfo();
-const currentEvidence = app.getEvidenceForWeek(weekInfo.key);
+const weekInfo = app.getParticipantWeekInfo(user);
+const currentEvidence = app.getEvidenceForWeek(weekInfo.key, user);
 const uploadWindow = app.getEvidenceUploadWindow(user);
 const historyRecords = app.loadEvidenceRecords();
 
@@ -320,6 +320,7 @@ dashboardEvidenceForm.addEventListener("submit", async (event) => {
 
     const record = {
       weekKey: weekInfo.key,
+      weekNumber: weekInfo.week,
       weekLabel: weekInfo.label,
       status: "Submitted",
       submittedAt: new Date().toISOString(),
