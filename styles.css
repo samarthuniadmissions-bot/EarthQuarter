@@ -1913,6 +1913,14 @@ h2 em {
 
 .certificate-print {
   width: fit-content;
+  color: var(--leaf-dark);
+  background: var(--sun);
+  border: 1px solid rgba(45, 90, 61, 0.18);
+  cursor: pointer;
+}
+
+.certificate-print:hover {
+  background: #f5cf72;
 }
 
 .dash-upload {
