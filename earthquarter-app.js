@@ -222,7 +222,8 @@
     });
   }
 
-  async function compressEvidencePhotoForEmail(file, maxBytes = 30000) {
+  // Keep the attachment well below EmailJS's 50 KB variable limit after encoding.
+  async function compressEvidencePhotoForEmail(file, maxBytes = 12000) {
     if (!file || !file.type || !file.type.startsWith("image/")) {
       throw new Error("Please upload a real image file.");
     }
@@ -256,11 +257,11 @@
       maxSide -= 120;
     }
 
-    if (bestBlob) {
+    if (bestBlob && bestBlob.size <= maxBytes) {
       return new File([bestBlob], `earthquarter-evidence-${Date.now()}.jpg`, { type: "image/jpeg" });
     }
 
-    throw new Error("We could not compress this image for email. Please try a smaller photo.");
+    throw new Error("This photo is still too large for EmailJS. Please choose a smaller or simpler photo.");
   }
 
   function setFormFile(form, inputName, file) {
