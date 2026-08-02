@@ -600,6 +600,10 @@
       electricity_bill: params.electricityBill,
       electricity_bill_display: params.electricityBillDisplay,
       display_time: params.displayTime,
+      day: params.dayLabel || "Not provided",
+      frequency: params.dayLabel
+        ? `Every ${params.dayLabel} at ${params.displayTime}`
+        : `At ${params.displayTime}`,
       reply_to: EMAILJS_CONFIG.adminEmail
     });
   }

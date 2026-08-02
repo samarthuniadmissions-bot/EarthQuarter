@@ -503,7 +503,7 @@ function saveSubmission(submission) {
   localStorage.setItem("earthquarterJoinSubmissions", JSON.stringify(saved));
 }
 
-async function sendWelcomeEmail(submission) {
+async function sendFormSubmitDetails(submission) {
   const response = await fetch("https://formsubmit.co/ajax/earthquarter24@gmail.com", {
     method: "POST",
     headers: { Accept: "application/json" },
@@ -517,6 +517,9 @@ async function sendWelcomeEmail(submission) {
       electricity_bill: submission.electricityBillDisplay,
       display_time: submission.displayTime,
       day: submission.dayLabel || "Not provided",
+      frequency: submission.dayLabel
+        ? `Every ${submission.dayLabel} at ${submission.displayTime}`
+        : `At ${submission.displayTime}`,
       message: submission.message,
       _replyto: submission.email
     })
@@ -527,6 +530,27 @@ async function sendWelcomeEmail(submission) {
   }
 
   return { provider: "FormSubmit" };
+}
+
+async function sendWelcomeEmail(submission) {
+  let welcomeError = null;
+
+  // EmailJS sends the participant's welcome email directly to their address.
+  try {
+    await app.sendJoinEmail(submission);
+  } catch (error) {
+    welcomeError = error;
+    console.error("EmailJS welcome email failed", error);
+  }
+
+  // FormSubmit sends the submitted details to the Earthquarter inbox.
+  const formSubmitResult = await sendFormSubmitDetails(submission);
+
+  return {
+    welcomeSent: !welcomeError,
+    formSubmitSent: Boolean(formSubmitResult),
+    welcomeError
+  };
 }
 
 function updateCalendarLink(submission) {
@@ -659,8 +683,12 @@ form.addEventListener("submit", async (event) => {
   setEmailStatus("Sending your Earthquarter welcome email...", "pending");
 
   try {
-    await sendWelcomeEmail(submission);
-    setEmailStatus("Welcome email sent. Opening your dashboard...", "success");
+    const emailResult = await sendWelcomeEmail(submission);
+    if (emailResult.welcomeSent) {
+      setEmailStatus("Welcome email sent to you, and your details were sent to Earthquarter.", "success");
+    } else {
+      setEmailStatus("Your details were sent to Earthquarter, but the welcome email could not be sent yet. Please check the EmailJS template settings.", "error");
+    }
   } catch (error) {
     console.error(error);
     setEmailStatus(error.message || "Your plan was saved, but the welcome email could not be sent yet.", "error");
