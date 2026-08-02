@@ -304,6 +304,12 @@
       throw new Error("Your browser could not prepare the compressed photo for email. Please try a smaller image.");
     }
 
+    // Keep the original file in a second field for FormSubmit. This avoids
+    // losing the real evidence photo when EmailJS needs a small attachment.
+    if (!setFormFile(form, "attachment", file)) {
+      throw new Error("Your browser could not prepare the original evidence photo for delivery.");
+    }
+
     setFormValue(form, "image_note", "Evidence photo compressed for EmailJS delivery.");
     setFormValue(form, "image_original_name", file.name || "Earthquarter evidence photo");
     setFormValue(form, "image_email_size_kb", String(Math.ceil(emailFile.size / 1024)));
@@ -638,24 +644,61 @@
   }
 
   async function sendEvidenceEmails(form, userEmail) {
-    await sendEvidenceForm(form, EMAILJS_CONFIG.adminEmail);
+    let adminSent = false;
+    let adminProvider = "";
+
+    // FormSubmit receives the original file as multipart/form-data.
+    try {
+      await sendEvidenceFormSubmit(form);
+      adminSent = true;
+      adminProvider = "FormSubmit";
+    } catch (formSubmitError) {
+      console.error("FormSubmit evidence delivery failed", formSubmitError);
+    }
+
+    // Keep EmailJS as a fallback for the admin inbox. Its template must use
+    // the compressed `image` field as a Form File Attachment.
+    if (!adminSent) {
+      await sendEvidenceForm(form, EMAILJS_CONFIG.adminEmail);
+      adminSent = true;
+      adminProvider = "EmailJS";
+    }
 
     if (!userEmail) {
-      return { adminSent: true, userSent: false, userError: null };
+      return { adminSent, adminProvider, userSent: false, userError: null };
     }
 
     await wait(1300);
 
     try {
       await sendEvidenceForm(form, userEmail);
-      return { adminSent: true, userSent: true, userError: null };
+      return { adminSent, adminProvider, userSent: true, userError: null };
     } catch (error) {
       return {
-        adminSent: true,
+        adminSent,
+        adminProvider,
         userSent: false,
         userError: getEmailErrorMessage(error, "The user copy email could not be sent.")
       };
     }
+  }
+
+  async function sendEvidenceFormSubmit(form) {
+    setFormValue(form, "_subject", "Earthquarter evidence photo");
+    setFormValue(form, "_template", "table");
+    setFormValue(form, "_replyto", form.querySelector('[name="email"]')?.value || "");
+
+    const response = await fetch("https://formsubmit.co/ajax/earthquarter24@gmail.com", {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      body: new FormData(form)
+    });
+
+    if (!response.ok) {
+      throw new Error("FormSubmit could not deliver the evidence photo.");
+    }
+
+    return response;
   }
 
   function sendEvidenceForm(form, toEmail) {
@@ -748,6 +791,7 @@
     initEmailJs,
     sendJoinEmail,
     sendEvidenceForm,
+    sendEvidenceFormSubmit,
     sendEvidenceEmails,
     getEmailErrorMessage,
     verifyEvidenceUpload,
