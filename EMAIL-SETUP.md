@@ -4,7 +4,8 @@ The join form now uses both delivery paths:
 
 - EmailJS sends the welcome email to the participant.
 - FormSubmit sends the submitted details to `earthquarter24@gmail.com`.
-- EmailJS sends evidence to `earthquarter24@gmail.com` and, when available, a copy to the participant.
+- FormSubmit sends the original evidence photo to `earthquarter24@gmail.com` as a multipart attachment.
+- EmailJS sends a copy to the participant and remains the admin fallback.
 
 ## EmailJS welcome template
 
@@ -16,7 +17,7 @@ The welcome template should send to `{{to_email}}` and include the participant's
 
 ## EmailJS evidence template
 
-The evidence template must contain a **File Attachment** whose source is **Form**, with parameter name `image`. The page compresses the selected image before sending because EmailJS has a small file-variable limit. The template can also use `{{image_original_name}}`, `{{image_email_size_kb}}`, `{{week_label}}`, `{{name}}`, `{{email}}`, `{{message}}`, and `{{to_email}}`.
+The evidence template must contain a **File Attachment** whose source is **Form**, with parameter name `image`. The page compresses the selected image before sending to EmailJS because EmailJS has a small file-variable limit. The original file is sent to the admin through FormSubmit as `attachment`. The template can also use `{{image_original_name}}`, `{{image_email_size_kb}}`, `{{week_label}}`, `{{name}}`, `{{email}}`, `{{message}}`, and `{{to_email}}`.
 
 If the template is not configured with that attachment, the email will contain the evidence details but no visible photo. This cannot be fixed from browser JavaScript alone; the EmailJS template setting is required.
 
