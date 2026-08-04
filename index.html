@@ -1423,6 +1423,42 @@ h2 em {
     font-size: clamp(0.68rem, 2.3vw, 0.86rem) !important;
   }
 
+  .founder-youtube {
+    margin: 10px 0 0;
+  }
+
+  .founder-youtube a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--leaf-dark);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .founder-youtube a:hover {
+    text-decoration: underline;
+  }
+
+  .youtube-icon {
+    width: 22px;
+    height: 16px;
+    display: inline-block;
+    border-radius: 5px;
+    background: #ff0000;
+    position: relative;
+  }
+
+  .youtube-icon::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 6px solid #ffffff;
+  }
+
   .hero,
   .countdown-action,
   .join-hero,
@@ -2369,6 +2405,12 @@ h2 em {
           <p>Build a culture where young people lead practical climate action through awareness, consistency, and shared responsibility.</p>
         </div>
         <p class="founder-contact">For more queries, mail us at - <strong><a href="mailto:earthquarter24@gmail.com">earthquarter24@gmail.com</a></strong></p>
+        <p class="founder-youtube">
+          <a href="https://www.youtube.com/@Earthquarter-24" target="_blank" rel="noopener noreferrer" aria-label="Visit the Earthquarter YouTube channel">
+            <span class="youtube-icon" aria-hidden="true"></span>
+            YouTube
+          </a>
+        </p>
       </div>
     </section>
   </main>
