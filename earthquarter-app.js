@@ -313,11 +313,9 @@
       throw new Error("Your browser could not prepare the compressed photo for email. Please try a smaller image.");
     }
 
-    // Keep the original file in a second field for FormSubmit. This avoids
-    // losing the real evidence photo when EmailJS needs a small attachment.
-    if (!setFormFile(form, "attachment", file)) {
-      throw new Error("Your browser could not prepare the original evidence photo for delivery.");
-    }
+    // Keep the original file separately. Some browsers reject assigning a
+    // second hidden file input, so FormSubmit receives it directly below.
+    form._earthquarterOriginalPhoto = file;
 
     setFormValue(form, "image_note", "Evidence photo compressed for EmailJS delivery.");
     setFormValue(form, "image_original_name", file.name || "Earthquarter evidence photo");
@@ -697,10 +695,19 @@
     setFormValue(form, "_template", "table");
     setFormValue(form, "_replyto", form.querySelector('[name="email"]')?.value || "");
 
+    const formData = new FormData(form);
+    const originalPhoto = form._earthquarterOriginalPhoto;
+    if (!originalPhoto) {
+      throw new Error("The original evidence photo is missing. Please choose the photo again.");
+    }
+
+    formData.delete("attachment");
+    formData.append("attachment", originalPhoto, originalPhoto.name || "earthquarter-evidence.jpg");
+
     const response = await fetch("https://formsubmit.co/ajax/earthquarter24@gmail.com", {
       method: "POST",
       headers: { Accept: "application/json" },
-      body: new FormData(form)
+      body: formData
     });
 
     if (!response.ok) {
