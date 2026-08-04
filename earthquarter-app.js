@@ -287,9 +287,18 @@
   }
 
   function setFormFile(form, inputName, file) {
-    const input = form.querySelector(`input[type="file"][name="${inputName}"]`);
-    if (!input || !file || typeof DataTransfer === "undefined") {
+    if (!form || !file || typeof DataTransfer === "undefined") {
       return false;
+    }
+
+    let input = form.querySelector(`input[type="file"][name="${inputName}"]`);
+    if (!input) {
+      input = document.createElement("input");
+      input.type = "file";
+      input.name = inputName;
+      input.accept = "image/*";
+      input.hidden = true;
+      form.appendChild(input);
     }
 
     const transfer = new DataTransfer();
