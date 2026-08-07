@@ -17,6 +17,13 @@
     return;
   }
 
+  const heroJoinLink = document.querySelector(".hero-join-link");
+  if (heroJoinLink) {
+    heroJoinLink.textContent = "Dashboard";
+    heroJoinLink.href = "dashboard.html";
+    heroJoinLink.setAttribute("aria-label", "Open your Earthquarter dashboard");
+  }
+
   document.querySelectorAll(".site-nav").forEach((nav) => {
     const links = Array.from(nav.querySelectorAll("a"));
     const hasDashboardLink = links.some((link) => link.textContent.trim().toLowerCase() === "dashboard");
