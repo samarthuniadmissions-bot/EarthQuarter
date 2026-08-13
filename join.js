@@ -532,15 +532,18 @@ async function sendFormSubmitDetails(submission) {
   return { provider: "FormSubmit" };
 }
 
-async function sendWelcomeEmail(submission) {
+async function sendWelcomeEmail(submission, sendWelcome = true) {
   let welcomeError = null;
 
-  // EmailJS sends the participant's welcome email directly to their address.
-  try {
-    await app.sendJoinEmail(submission);
-  } catch (error) {
-    welcomeError = error;
-    console.error("EmailJS welcome email failed", error);
+  // EmailJS sends one welcome email per email address on each device. A
+  // returning participant on this device should not receive a duplicate.
+  if (sendWelcome) {
+    try {
+      await app.sendJoinEmail(submission);
+    } catch (error) {
+      welcomeError = error;
+      console.error("EmailJS welcome email failed", error);
+    }
   }
 
   // FormSubmit sends the submitted details to the Earthquarter inbox.
@@ -548,6 +551,7 @@ async function sendWelcomeEmail(submission) {
 
   return {
     welcomeSent: !welcomeError,
+    welcomeSkipped: !sendWelcome,
     formSubmitSent: Boolean(formSubmitResult),
     welcomeError
   };
@@ -676,6 +680,12 @@ form.addEventListener("submit", async (event) => {
 
   isSubmitting = true;
   const submission = buildSubmission();
+  const existingUser = app ? app.loadUser() : null;
+  const sameDeviceReturningUser = Boolean(
+    existingUser &&
+    existingUser.email &&
+    String(existingUser.email).trim().toLowerCase() === submission.email.trim().toLowerCase()
+  );
   submitButton.disabled = true;
   saveSubmission(submission);
   saveEarthquarterUser(submission);
@@ -683,8 +693,10 @@ form.addEventListener("submit", async (event) => {
   setEmailStatus("Sending your Earthquarter welcome email...", "pending");
 
   try {
-    const emailResult = await sendWelcomeEmail(submission);
-    if (emailResult.welcomeSent) {
+    const emailResult = await sendWelcomeEmail(submission, !sameDeviceReturningUser);
+    if (emailResult.welcomeSkipped) {
+      setEmailStatus("Your plan was updated on this device, and your details were sent to Earthquarter. No duplicate welcome email was sent.", "success");
+    } else if (emailResult.welcomeSent) {
       setEmailStatus("Welcome email sent to you, and your details were sent to Earthquarter.", "success");
     } else {
       setEmailStatus("Your details were sent to Earthquarter, but the welcome email could not be sent yet. Please check the EmailJS template settings.", "error");
