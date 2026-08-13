@@ -11,8 +11,8 @@
     joinServiceId: "gmail_earthquarter",
     joinTemplateId: "template_b1qj1hj",
     evidenceServiceId: "gmail_earthquarter",
-    // Duplicate or adjust this template in EmailJS so the file attachment field is named `image`.
-    evidenceTemplateId: "template_b1qj1hj",
+    // Evidence template uses the `image` form-file attachment field.
+    evidenceTemplateId: "template_d0z3o0c",
     adminEmail: "earthquarter24@gmail.com"
   };
 
