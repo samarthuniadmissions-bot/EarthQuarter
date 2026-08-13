@@ -695,7 +695,8 @@ form.addEventListener("submit", async (event) => {
   try {
     const emailResult = await sendWelcomeEmail(submission, !sameDeviceReturningUser);
     if (emailResult.welcomeSkipped) {
-      setEmailStatus("Your plan was updated on this device, and your details were sent to Earthquarter. No duplicate welcome email was sent.", "success");
+      emailStatus.hidden = true;
+      emailStatus.textContent = "";
     } else if (emailResult.welcomeSent) {
       setEmailStatus("Welcome email sent to you, and your details were sent to Earthquarter.", "success");
     } else {
