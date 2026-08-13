@@ -690,8 +690,6 @@ form.addEventListener("submit", async (event) => {
   saveSubmission(submission);
   saveEarthquarterUser(submission);
   updateCalendarLink(submission);
-  setEmailStatus("Sending your Earthquarter welcome email...", "pending");
-
   try {
     const emailResult = await sendWelcomeEmail(submission, !sameDeviceReturningUser);
     if (emailResult.welcomeSkipped) {
